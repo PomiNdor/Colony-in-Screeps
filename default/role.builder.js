@@ -23,7 +23,7 @@ var roleBuilder = {
 	    }
 
 	    if(creep.memory.building) {
-	        var targets_build = creep.room.find(FIND_CONSTRUCTION_SITES);
+	        var targets_build = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
 	        var targets_repair = creep.room.find(FIND_STRUCTURES, {
 	            filter: object => object.hits < object.hitsMax});
 	        targets_repair.sort((a,b) => a.hits - b.hits);
@@ -33,9 +33,9 @@ var roleBuilder = {
 	                creep.moveTo(targets_repair[0], {visualizePathStyle: {stroke: builderColor}});
 	            }
 	        }
-            else if(targets_build.length) {
-                if(creep.build(targets_build[0]) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(targets_build[0], {visualizePathStyle: {stroke: builderColor}});
+            else if(targets_build) {
+                if(creep.build(targets_build) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(targets_build, {visualizePathStyle: {stroke: builderColor}});
                 }
             // } else if (targets_repair.length) {
 	           // if (creep.repair(targets_repair[0]) == ERR_NOT_IN_RANGE) {
@@ -47,10 +47,19 @@ var roleBuilder = {
             }
 	    }
 	    else {
-	        var sources = creep.room.find(FIND_SOURCES_ACTIVE); //creep.room.find(FIND_SOURCES_ACTIVE);
-            if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(sources[0], {visualizePathStyle: {stroke: builderColor}});
-            }
+	        let target_resource = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES);
+            if (target_resource) {
+                if (creep.pickup(target_resource) == ERR_NOT_IN_RANGE)
+                    creep.moveTo(target_resource, {visualizePathStyle: {stroke: builderColor}});
+            } else if (creep.room.storage && creep.room.storage.store[RESOURCE_ENERGY] > 10000) {
+	            if(creep.withdraw(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(creep.room.storage, {visualizePathStyle: {stroke: builderColor}});
+                }
+	        } else {
+	            var sources = creep.room.find(FIND_SOURCES_ACTIVE); //creep.room.find(FIND_SOURCES_ACTIVE);
+                if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE)
+                    creep.moveTo(sources[0], {visualizePathStyle: {stroke: builderColor}});
+	        }
 	    }
 	}
 };

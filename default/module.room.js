@@ -23,42 +23,49 @@ room.memory:
 
 const rootRooms = [
     { 
+        //1800 - 1000 - 200 - 500
         name: 'E2S17', 
         miningRooms: ['E1S17', 'E2S18', 'E1S16', 'E1S18'], // 'E1S18'
         NoSearchedRooms: [],
         
         restPoint: {x: 16, y: 40},
-        harvesters_countMax: 2,
+        transporters_countMax: 2,
+        transporterParts: [...(new Array(10).fill(CARRY)), ...(new Array(10).fill(MOVE))],
+        
+        harvesters_countMax: 1,
         harvesterParts: [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
-        upgraders_countMax: 3,
+        upgraders_countMax: 1,
         upgraderParts: [WORK, WORK, WORK, WORK,  CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
-        builders_countMax: 2,
-        builderParts: [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
+        builders_countMax: 1,
+        builderParts: [WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE],
         
-        carrierParts: [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
-                       MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE],
-        minerParts: [WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE],
+        carrierParts: [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
+                       MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE],
+        minerParts: [WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE],
         
-        carriUpgraders_countMax: 1,
-        carriUpgraderParts: [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, 
-                             MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,  MOVE,  MOVE,  MOVE]
+        carriUpgraders_countMax: 4,
+        carriUpgraderParts: [WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, 
+                             MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE]
     },
     { 
         name: 'E4S17', 
         miningRooms: [],
         NoSearchedRooms: [],
         
-        restPoint: {x: 21, y: 5},
-        harvesters_countMax: 2,
-        harvesterParts: [WORK, CARRY, MOVE, MOVE],
+        restPoint: {x: 30, y: 8},
+        transporters_countMax: 1,
+        transporterParts: [...(new Array(5).fill(CARRY)), ...(new Array(5).fill(MOVE))],
+        // 1300
+        harvesters_countMax: 1,
+        harvesterParts: [WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE],
         upgraders_countMax: 3,
-        upgraderParts: [WORK, CARRY, MOVE, MOVE],
-        builders_countMax: 2,
-        builderParts: [WORK, CARRY, MOVE, MOVE],
+        upgraderParts: [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, 
+                        MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,  MOVE,  MOVE,  MOVE,  MOVE],
+        builders_countMax: 1,
+        builderParts: [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
         
-        carrierParts: [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
-                       MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE],
-        minerParts: [WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE],
+        carrierParts: [],
+        minerParts: [WORK, WORK, WORK, WORK, CARRY, MOVE],
         
         carriUpgraders_countMax: 0,
         carriUpgraderParts: [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, 
@@ -68,38 +75,94 @@ const rootRooms = [
 
 
 
-const roomNames = ['E1S17', 'E2S18', 'E1S16', 'E1S18']; // 'E1S18'
+// const roomNames = ['E1S17', 'E2S18', 'E1S16', 'E1S18']; // 'E1S18'
 
+function setRootRoomsConstants() {
+    Memory.rootRooms = rootRooms;
+    for (let i in Memory.rootRooms) {
+        let rootRoom = Memory.rootRooms[i];
+       
+        let miners = 0;
+        let carriers = 0;
+        let SetRoomConstants = function(roomName) {
+            
+            let memoryRoom = Memory.rooms[roomName];
+            
+            if (memoryRoom && memoryRoom.resources) {
+                miners += Memory.rooms[roomName].resources.length;
+                if (roomName != rootRoom.name)
+                    carriers += Memory.rooms[roomName].resources.length;
+            }
+                
+                
+            // Если к комнате привязаны грузчики, привязаны ли к грузчикам комнаты
+            if (memoryRoom && memoryRoom.carriers) {
+                for (let i in memoryRoom.carriers) {
+                    let carryCreep = Game.creeps[memoryRoom.carriers[i]];
+                    if (!carryCreep || carryCreep.memory.targetRoom != roomName) {
+                        // console.log('Удаляю ', memoryRoom.carriers[i], ' ', carryCreep);
+                        memoryRoom.carriers.splice(i, 1);
+                    }
+                }
+            }
+            
+            // Подсчет ресов в комнате
+            var room = Game.rooms[roomName];
+            let roomCountRes = 0;
+            if (room) {
+                _.forEach(room.find(FIND_DROPPED_RESOURCES), dropped_res => {
+                    roomCountRes += dropped_res.amount;
+                });
+                _.forEach(room.find(FIND_STRUCTURES, {filter: struct => struct.structureType == 'container'}), container => {
+                    roomCountRes += container.store[RESOURCE_ENERGY];
+                });
+                
+                room.memory.countResEnergy = roomCountRes;
+            }
+        }
+        
+        SetRoomConstants(rootRoom.name);
+        _.forEach(rootRoom.miningRooms, miningRoom => SetRoomConstants(miningRoom));
+        
+        rootRoom.miners_countMax = miners;
+        rootRoom.carriers_countMax = carriers + Math.floor(carriers / 2);
+        // if (Memory.rooms[rootRoom] && Memory.rooms[rootRoom].resources) {
+        //     rootRoom.rootMiners_countMax = Memory.rooms[rootRoom].resources.length;
+        //     rootRoom.rootCarrier_countMax = 1;
+        // } else { 
+        //     rootRoom.rootMiners_countMax  = 0;
+        //     rootRoom.rootCarrier_countMax = 0;
+        // }
+        
+    };
+    
+    
+    
+}
 
 var moduleRoom = {
-    setRootRoomsConstants: function() {
-        Memory.rootRooms = rootRooms;
+    run: function() {
+        setRootRoomsConstants();
+        
         for (let i in Memory.rootRooms) {
             let rootRoom = Memory.rootRooms[i];
-           
-            let miners = 0;
-            _.forEach(rootRoom.miningRooms, miningRoom => {
-                if (Memory.rooms[miningRoom] && Memory.rooms[miningRoom].resources)
-                    miners += Memory.rooms[miningRoom].resources.length;
+            if (Memory.rooms && Memory.rooms[rootRoom.name]) {
+                this.actualize(rootRoom.name);
+                this.visualize(rootRoom.name);
+            }
+            
+            rootRoom.miningRooms.forEach(nameRoom => {
+                //moduleRoom.refresh(Game.rooms[nameRoom], 'f7e936eb12ab2716ef044d2f');
+                
+                SetSettings(nameRoom); // room - Memory.rooms[name]
+                if (Memory.rooms && Memory.rooms[nameRoom]) {
+                    this.actualize(nameRoom);
+                    this.visualize(nameRoom);
+                }
             });
-            rootRoom.miners_countMax = miners;
-            rootRoom.carriers_countMax = miners;// + Math.floor(miners / 2);
-            // if (Memory.rooms[rootRoom] && Memory.rooms[rootRoom].resources) {
-            //     rootRoom.rootMiners_countMax = Memory.rooms[rootRoom].resources.length;
-            //     rootRoom.rootCarrier_countMax = 1;
-            // } else { 
-            //     rootRoom.rootMiners_countMax  = 0;
-            //     rootRoom.rootCarrier_countMax = 0;
-            // }
-            
-            //if (Memory.rooms[rootRoom.name]) Memory.rooms[rootRoom.name]
-            
-        };
+        }
     },
     
-    
-    // room - Memory.rooms[name]
-    set: function(nameRoom) { SetSettings(nameRoom); },
     refresh: function(room, resourceId = '') { RefreshSettings(room, resourceId) },
     
     // Визуализация данных в комнате
@@ -107,7 +170,7 @@ var moduleRoom = {
         let gameRoom = Game.rooms[nameRoom];
         if (gameRoom) {
             //let room = Game.rooms[name];
-            if (!gameRoom.memory.resources) SetSettings(room);
+            if (!gameRoom.memory.resources) SetSettings(nameRoom);
             
             gameRoom.memory.resources.forEach(res => {
                 let step = 0.7;
@@ -128,7 +191,7 @@ var moduleRoom = {
     },
     actualize: function(nameRoom) {
         let memoryRoom = Memory.rooms[nameRoom];
-        if (memoryRoom) {
+        if (memoryRoom && memoryRoom.resources) {
             memoryRoom.resources.forEach(res => {
                 
                 for (let i in res.creeps) {
@@ -180,6 +243,9 @@ var moduleRoom = {
         // }
     }
 }
+
+
+
 function SetSettings(nameRoom) {
     if (!Memory.rooms || !Memory.rooms[nameRoom] || !Memory.rooms[nameRoom].resources) {
         

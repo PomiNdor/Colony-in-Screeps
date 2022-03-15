@@ -21,13 +21,20 @@ var roleUpgrader = {
         
         
 	    if(!creep.memory.upgrading) {
-            var sources = creep.pos.findClosestByRange(FIND_SOURCES_ACTIVE);
-            if(creep.withdraw(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+	        if (creep.room.storage.store[RESOURCE_ENERGY] < 20000) {
+	            creep.moveTo(25, 22);
+	        }
+            else if(creep.withdraw(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(creep.room.storage, {visualizePathStyle: {stroke: '#ffffff'}});
             }
         }
         else {
-            if(creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
+            var targets_build = creep.room.find(FIND_CONSTRUCTION_SITES);
+            if(targets_build.length) {
+                if(creep.build(targets_build[0]) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(targets_build[0], {visualizePathStyle: {stroke: '#ffffff'}});
+                }
+            } else if (creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: '#ffffff'}});
             }
         }

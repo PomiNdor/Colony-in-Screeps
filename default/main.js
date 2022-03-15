@@ -7,9 +7,10 @@ var roleSpawner =   require('role.spawner');
 
 var roleMiner =     require('role.miner');
 var roleSearcher =  require('role.searcher');
-var roleCarrier =  require('role.carrier');
-var roleDamager =  require('role.damager');
-var roleTower =  require('role.tower');
+var roleCarrier =   require('role.carrier');
+var roleDamager =   require('role.damager');
+var roleTower =     require('role.tower');
+var roleTransporter =  require('role.transporter');
 // E4S17
 
 var moduleRoom =        require('module.room');
@@ -18,37 +19,24 @@ var moduleConstants =   require('module.constants');
 const roomNames = moduleConstants.roomNames;  // 'E2S17'
 
 module.exports.loop = function () {
-    moduleRoom.setRootRoomsConstants();
-    
-    
-    // --------- SPAWN
-    for(var name in Game.spawns) {
-        roleSpawner.run(Game.spawns[name]);
-    }
+    // Game.creeps['carrier_29573682'].moveTo(43, 25);
+    //Game.creeps['carrier_29574074'].move(BOTTOM);
+    //Game.creeps['carrier_29573682'].moveTo(44, 21);
     
     // --------- ROOMS
-    roomNames.forEach(nameRoom => {
-        //moduleRoom.refresh(Game.rooms[nameRoom], 'f7e936eb12ab2716ef044d2f');
+    moduleRoom.run();
+    //Game.creeps['test_29542779'].moveTo(18, 48);
+    
+    // --------- SPAWN
+    for(var name in Game.spawns)
+        roleSpawner.run(Game.spawns[name]);
         
-        moduleRoom.set(nameRoom);
-        if (Memory.rooms && Memory.rooms[nameRoom]) {
-            moduleRoom.actualize(nameRoom);
-            moduleRoom.visualize(nameRoom);
-        }
-            
-    });
-    
-    
     // --------- TOWER
-    
-    _.forEach(['60e01b8ce63ac4823ee239fc', '60e390b7e23798720459b086'], towerId => {
+    _.forEach(['60e01b8ce63ac4823ee239fc', '60e390b7e23798720459b086', '60e640959ce544f9aa0d90d6'], towerId => {
         var tower = Game.getObjectById(towerId);
         if(tower) roleTower.run(tower);
     });
     
-    
-    // --------- SPAWN
-    roleSpawner.run(Game.spawns['Spawn1']);
     // --------- CREEPS
 
     for(var name in Game.creeps) {
@@ -77,6 +65,9 @@ module.exports.loop = function () {
         }
         if(creep.memory.role == 'carriUpgrader') {
             roleCarriUpgrader.run(creep);
+        }
+        if (creep.memory.role == 'transporter') {
+            roleTransporter.run(creep);
         }
         
         
@@ -111,47 +102,55 @@ module.exports.loop = function () {
         //     }
         // }
         
-        
-        
-        //Game.spawns['Spawn1'].spawnCreep([CLAIM, WORK, CARRY, MOVE, MOVE, MOVE],'claimer_'+Game.time, {memory: {role: 'claimer'}});
-        //Game.spawns['Spawn1'].spawnCreep([TOUGH, TOUGH, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],'claimer_'+Game.time, {memory: {role: 'claimer'}});
-        if (creep.memory.role == 'claimer') {
-            //console.log(creep.getObjectById('5bbcad559099fc012e63722e'));
-            const route = Game.map.findRoute(creep.room, 'E4S17');
-            
+        if (creep.memory.role == 'reserver') {
+            const route = Game.map.findRoute(creep.room, 'E1S17'); // E1S16 E2S16
             if(route.length > 0) {
-                console.log('Now heading to room '+route[0].room);
-                if (creep.room.name == 'E2S16')
-                    creep.moveTo(33, 0, {visualizePathStyle: {stroke: 'purple', opacity: 0.5}});
-                else if (creep.room.name == 'E2S15')
-                    creep.moveTo(49, 34, {visualizePathStyle: {stroke: 'purple', opacity: 0.5}});
-                else if (creep.room.name == 'E3S15')
-                    creep.moveTo(49, 39, {visualizePathStyle: {stroke: 'purple', opacity: 0.5}});
-                else if (creep.room.name == 'E4S15')
-                    creep.moveTo(10, 49, {visualizePathStyle: {stroke: 'purple', opacity: 0.5}});
-                else {
-                    let exit = creep.pos.findClosestByRange(route[0].exit);
-                    //creep.moveTo(49, 38,  {visualizePathStyle: {stroke: 'purple', opacity: 0.5}});
-                    creep.moveTo(exit, {visualizePathStyle: {stroke: 'purple', opacity: 0.5}});
-                }
-                    
+                let exit = creep.pos.findClosestByRange(route[0].exit);
+                creep.moveTo(exit, {visualizePathStyle: {stroke: 'purple', opacity: 0.5}});
             }
-            else {
-                if (creep.pos.x != 12 && creep.pos.y != 3) creep.moveTo(12, 3);
-                else creep.memory.role = 'builder';
-                // var sources = creep.room.find(FIND_SOURCES_ACTIVE); //creep.room.find(FIND_SOURCES_ACTIVE);
-                // if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
-                //     creep.moveTo(sources[0], {visualizePathStyle: {stroke: '#ffffff'}});
-                // }
-                // if(creep.room.controller) {
-                //     if(creep.claimController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                //         creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: 'purple', opacity: 0.5}});
-                //     }
-                // }
+            else if(creep.room.controller) {
+                if(creep.reserveController(creep.room.controller) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: 'purple', opacity: 0.5}});
+                }
             }
         }
         
-        let damagerParts = [ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE, MOVE];
+        //Game.spawns['Spawn1'].spawnCreep([CLAIM, CLAIM, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],'claimer_'+Game.time, {memory: {role: 'claimer'}});
+        //Game.spawns['Spawn1'].spawnCreep([TOUGH, TOUGH, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],'claimer_'+Game.time, {memory: {role: 'claimer'}});
+        if (creep.memory.role == 'claimer') {
+            //console.log(creep.getObjectById('5bbcad559099fc012e63722e'));
+            const route = Game.map.findRoute(creep.room, 'E1S17'); // E1S16 E2S16
+            
+            if(route.length > 0) {
+                console.log('Now heading to room '+route[0].room);
+                // if (creep.room.name == 'E2S16')
+                //     creep.moveTo(33, 0, {visualizePathStyle: {stroke: 'purple', opacity: 0.5}});
+                // else if (creep.room.name == 'E2S15')
+                //     creep.moveTo(49, 34, {visualizePathStyle: {stroke: 'purple', opacity: 0.5}});
+                // else if (creep.room.name == 'E3S15')
+                //     creep.moveTo(49, 39, {visualizePathStyle: {stroke: 'purple', opacity: 0.5}});
+                // else if (creep.room.name == 'E4S15')
+                //     creep.moveTo(10, 49, {visualizePathStyle: {stroke: 'purple', opacity: 0.5}});
+                // else {
+                    let exit = creep.pos.findClosestByRange(route[0].exit);
+                    //creep.moveTo(49, 38,  {visualizePathStyle: {stroke: 'purple', opacity: 0.5}});
+                    creep.moveTo(exit, {visualizePathStyle: {stroke: 'purple', opacity: 0.5}});
+                //}
+                    
+            }
+            else {
+                // if (creep.pos.x != 12 && creep.pos.y != 3) creep.moveTo(12, 3);
+                // else creep.memory.role = 'builder';
+                
+                if(creep.room.controller) {
+                    if(creep.claimController(creep.room.controller) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: 'purple', opacity: 0.5}});
+                    }
+                }
+            }
+        }
+        
+        let damagerParts = [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE, MOVE];
         //Game.spawns['Spawn1'].spawnCreep(damagerParts, 'damager_'+Game.time, {memory: {role: 'damager'}});
         //Game.spawns['Spawn1'].spawnCreep([ATTACK, MOVE], 'damager_'+Game.time, {memory: {role: 'damager'}});
         if (creep.memory.role == 'damager') {

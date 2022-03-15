@@ -22,8 +22,27 @@ var roleUpgrader = {
         
         
 	    if(!creep.memory.upgrading) {
+	        let target_resource = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES);
+            let target_container = creep.pos.findClosestByRange(FIND_STRUCTURES, { filter: (structure) => { 
+                return structure.structureType == STRUCTURE_CONTAINER && structure.store[RESOURCE_ENERGY] >= 100;
+            }});
             var sources = creep.pos.findClosestByRange(FIND_SOURCES_ACTIVE);
-            if(creep.harvest(sources) == ERR_NOT_IN_RANGE) {
+            
+            if (target_resource && CreepInObjectRadius(creep, target_resource)) {
+                if (creep.pickup(target_resource) == ERR_NOT_IN_RANGE)
+                    creep.moveTo(target_resource, {visualizePathStyle: {stroke: '#ffffff'}});
+            }
+            else if (target_container && CreepInObjectRadius(creep, target_container)) {
+                if(creep.withdraw(target_container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
+                    creep.moveTo(target_container);
+            }
+            else if (target_resource) {
+                if (creep.pickup(target_resource) == ERR_NOT_IN_RANGE)
+                    creep.moveTo(target_resource, {visualizePathStyle: {stroke: '#ffffff'}});
+            } else if (target_container) {
+                if(creep.withdraw(target_container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
+                    creep.moveTo(target_container);
+            } else if(creep.harvest(sources) == ERR_NOT_IN_RANGE) {
                 creep.moveTo(sources, {visualizePathStyle: {stroke: '#ffffff'}});
             }
         }
@@ -36,3 +55,10 @@ var roleUpgrader = {
 };
 
 module.exports = roleUpgrader;
+
+
+function CreepInObjectRadius(creep, object, radius = 1) {
+    let x = creep.pos.x - object.pos.x;
+    let y = creep.pos.y - object.pos.y;
+    return (x >= -radius && x <= radius) && (y >= -radius && y <= radius);
+}
