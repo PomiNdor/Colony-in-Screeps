@@ -7,8 +7,13 @@
  * mod.thing == 'a thing'; // true
  */
 
+var moduleConstants = require('module.constants');
+const roomNames = moduleConstants.roomNames;
+
+
 function FindMinRangeResources(creep, resources) {
     let minRes = resources[0];
+    //console.log('resources ', resources);
     let minRange = creep.pos.getRangeTo(Game.getObjectById(minRes.id));
     _.forEach(resources, res => {
         let range = creep.pos.getRangeTo(Game.getObjectById(res.id));
@@ -23,36 +28,54 @@ function FindMinRangeResources(creep, resources) {
 
 var roleMiner = {
     run: function(creep) {
+        if (creep.spawning) return;
         
         // Проверка если у крипа есть цель, есть ли у цели крип?
-        if (creep.memory.targetId) {
-            for (var roomName in Memory.rooms) {
-                if (!creep.memory.targetId) break;
-                let room = Memory.rooms[roomName];
-                let res = _.find(room.resources, item => item.id == creep.memory.targetId);
+        if (creep.memory.target) {
+            let finded = false;
+            for (let i in roomNames) {
+                if (!creep.memory.target) break;
                 
-                if (res) {
-                    if (!(_.find(res.creeps, resCrep => resCrep.name == creep.name))) {
-                        delete creep.memory.targetId;
-                        break;
-                    }
+                roomName = roomNames[i];
+                let memoryRoom = Memory.rooms[roomName];
+                if (memoryRoom) {
+                    let res = _.find(memoryRoom.resources, item => item.id == creep.memory.target.id);
+                
+                    if (res && _.find(res.creeps, resCrep => resCrep.name == creep.name))
+                        finded = true;
                 }
+            }
+            // roomNames.forEach(roomName => { });
+            if (!finded) {
+                delete creep.memory.target;
+                delete creep.memory.constructionContainer;
+                delete creep.memory.building;
+                delete creep.memory.container;
             }
         }
         
         
         // Если нет цели
-        if (!creep.memory.targetId) {
+        if (!creep.memory.target) {
+            creep.say("Нет цели!");
             creep.memory.mining = false;
+            
             // Перебираем все комнаты и их точки ресурсов
-            for (var roomName in Memory.rooms) {
-                if (creep.memory.targetId) break;
-                let room = Memory.rooms[roomName];
+            for (let i in roomNames) {
+                //console.log('roomNames[i] ', roomNames[i]);
+                //console.log('Memory.rooms[roomNames[i]] ', Memory.rooms[roomNames[i]]);
+                if (!Memory.rooms[roomNames[i]]) continue;
+                if (creep.memory.target) break;
                 
+                let room = Memory.rooms[roomNames[i]];
+                
+                //Memory.test = room;
+                //console.log(roomNames[i], " ", room);
                 let resources = _.filter(room.resources, item => !(_.find(item.creeps, creep => creep.role == 'miner')));
-                if (resources) {
+                //console.log('resources ', resources);
+                if (resources && resources.length > 0) {
                     let res = FindMinRangeResources(creep, resources);
-                    creep.memory.targetId = res.id;
+                    creep.memory.target = {id: res.id, roomName: roomNames[i]};
                     res.creeps.push(({name: creep.name, role: creep.memory.role}));
                     break;
                 }
@@ -61,17 +84,24 @@ var roleMiner = {
         
         
         // Если не дошел до цели и пока не копает
-        if (!creep.memory.mining && creep.memory.targetId) {
+        if (!creep.memory.mining) { //  && creep.memory.target
             // Получаем объект
-            let target = Game.getObjectById(creep.memory.targetId);
+            let target = Game.getObjectById(creep.memory.target.id);
+            if (target === null) {
+                creep.say(creep.memory.target.roomName);
+                let route = Game.map.findRoute(creep.room, creep.memory.target.roomName);
+                if (route.length > 0)
+                    creep.moveTo(creep.pos.findClosestByRange(route[0].exit), {visualizePathStyle: {stroke: '#ffffff'}});
+            }
             // Если не в радиусе одной клетки, то движемся к цели
-            if (!CreepInObjectRadius(creep, target)) // creep.harvest(target) == ERR_NOT_IN_RANGE
+            else if (!CreepInObjectRadius(creep, target)) // creep.harvest(target) == ERR_NOT_IN_RANGE
                 creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
             else
                 FindOrBuildStorage(creep, target);
         }
         
         if (creep.memory.mining) {
+            let target = Game.getObjectById(creep.memory.target.id);
             if (creep.memory.constructionContainer) {
                 if (creep.store.getFreeCapacity(RESOURCE_ENERGY) == 0)
                     creep.memory.building = true;
@@ -80,20 +110,20 @@ var roleMiner = {
                     
                 if (creep.memory.building) {
                     let constructionContainer = Game.getObjectById(creep.memory.constructionContainer);
-                
-                    if (!constructionContainer.hits) {
-                        creep.build(constructionContainer);
-                    } else {
+                    if (!constructionContainer) {
+                        FindOrBuildStorage(creep, target);
                         delete creep.memory.constructionContainer;
                         delete creep.memory.building;
-                        creep.memory.container = constructionContainer.id;
+                    }
+                    if (!constructionContainer.hits) {
+                        creep.build(constructionContainer);
                     }
                 } else {
-                    let target = Game.getObjectById(creep.memory.targetId);
                     creep.harvest(target); // можно оптимизировать метод getObjectById()
                 }
+            } else if (!creep.memory.container) {
+                FindOrBuildStorage(creep, target);
             } else {
-                let target = Game.getObjectById(creep.memory.targetId);
                 creep.harvest(target); // можно оптимизировать метод getObjectById()
             }
         }
@@ -108,7 +138,7 @@ function FindOrBuildStorage(creep, target) {
     // Если есть контейнер
     if (structuresContainer.length > 0) {
         
-        creep.memory.container = structuresContainer[0].id;
+        creep.memory.container = structuresContainer[0].structure.id;
         if (structuresContainer[0].x == creep.pos.x && structuresContainer[0].y == creep.pos.y) {
             creep.say("У 1📦️!");
             creep.memory.mining = true;

@@ -19,7 +19,7 @@ var roleHarvester = {
             }
         }
         else {
-            var targets = creep.room.find(FIND_STRUCTURES, {
+            let targets = creep.room.find(FIND_STRUCTURES, {
                     filter: (structure) => {
                         return (
                             structure.structureType == STRUCTURE_EXTENSION || 
@@ -27,20 +27,17 @@ var roleHarvester = {
                             structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
                     }
             });
-            var towers = creep.room.find(FIND_STRUCTURES, {
-                    filter: (structure) => {
-                        return
-                            structure.structureType == STRUCTURE_TOWER &&
-                            structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+            let towers = creep.room.find(FIND_STRUCTURES, { filter: (structure) => {
+                        return  structure.structureType == STRUCTURE_TOWER &&
+                                structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
                     }
             });
-            var storage = creep.room.find(FIND_STRUCTURES, {
-                    filter: (structure) => {
-                        return
-                            structure.structureType == STRUCTURE_STORAGE &&
-                            structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
+            let storage = creep.room.find(FIND_STRUCTURES, { filter: (structure) => {
+                        return  structure.structureType == STRUCTURE_STORAGE &&
+                                structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
                     }
             });
+            
             if(targets.length > 0) {
                 if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#ffffff'}});
@@ -56,7 +53,7 @@ var roleHarvester = {
             } else {
                 if (creep.store.getFreeCapacity() > 0)
                     creep.memory.harvesting = true;
-                else creep.moveTo(37,17, {visualizePathStyle: {stroke: '#ffffff'}});
+                else creep.moveTo(16,40, {visualizePathStyle: {stroke: '#ffffff'}});
             }
         }
 	}
