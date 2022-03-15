@@ -16,9 +16,7 @@ var moduleConstants =   require('module.constants');
 const roomNames = moduleConstants.roomNames;  // 'E2S17'
 
 module.exports.loop = function () {
-    //moduleConstants.setRootRoomsSettings();
-    
-    
+    moduleConstants.setRootRoomsConstants();
     
     
     // --------- SPAWN
@@ -108,17 +106,27 @@ module.exports.loop = function () {
         
         let damagerParts = [ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE, MOVE];
         //Game.spawns['Spawn1'].spawnCreep(damagerParts, 'damager', {memory: {role: 'damager'}});
+        //Game.spawns['Spawn1'].spawnCreep([ATTACK, MOVE], 'damager_'+Game.time, {memory: {role: 'damager'}});
         if (creep.memory.role == 'damager') {
             //console.log(creep.getObjectById('5bbcad559099fc012e63722e'));
-            const route = Game.map.findRoute(creep.room, 'E7S14');
+            const route = Game.map.findRoute(creep.room, 'E5S17');
             if(route.length > 0) {
                 console.log('Now heading to room '+route[0].room);
                 const exit = creep.pos.findClosestByRange(route[0].exit);
                 creep.moveTo(exit, {visualizePathStyle: {stroke: 'red', opacity: 0.5}});
             }
             else {
+                let target_tower = creep.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES, 
+                    { filter: (structure) => { 
+                        return  structure.structureType == STRUCTURE_TOWER; }
+                });
                 const target_creeps = creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);//FIND_HOSTILE_CREEPS
-                if(target_creeps != null) {
+                if (target_tower) {
+                    if(creep.attack(target_tower) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(target_tower, {visualizePathStyle: {stroke: 'red'}});
+                    }
+                }
+                else if(target_creeps != null) {
                     if(creep.attack(target_creeps) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(target_creeps, {visualizePathStyle: {stroke: 'red'}});
                     }

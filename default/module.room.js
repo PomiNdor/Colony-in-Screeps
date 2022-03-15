@@ -21,7 +21,40 @@ room.memory:
     }, ...],
 */
 
+const rootRooms = [
+    { name: 'E2S17', miningRooms: ['E1S17', 'E2S18', 'E1S16'] } // 'E1S18'
+]
+const roomNames = ['E1S17', 'E2S18', 'E1S16']; // 'E1S18'
+
+
 var moduleRoom = {
+    
+    setRootRoomsConstants: function() {
+        Memory.rootRooms = rootRooms;
+        for (let i in Memory.rootRooms) {
+            let rootRoom = Memory.rootRooms[i];
+           
+            let miners_countMax = 0;
+            _.forEach(rootRoom.miningRooms, miningRoom => {
+                if (Memory.rooms[miningRoom] && Memory.rooms[miningRoom].resources)
+                    miners_countMax += Memory.rooms[miningRoom].resources.length;
+            });
+            
+            rootRoom.miners_countMax = miners_countMax;
+            rootRoom.carriers_countMax = miners + (miners / 2);
+            if (Memory.rooms[rootRoom] && Memory.rooms[rootRoom].resources) {
+                rootRoom.rootMiners_countMax = Memory.rooms[rootRoom].resources.length;
+                rootRoom.rootCarrier_countMax = 1;
+            } else { 
+                rootRoom.rootMiners_countMax  = 0;
+                rootRoom.rootCarrier_countMax = 0;
+            }
+            
+        };
+    },
+    
+    
+    
     // room - Memory.rooms[name]
     set: function(nameRoom) { SetSettings(nameRoom); },
     refresh: function(room, resourceId = '') { RefreshSettings(room, resourceId) },

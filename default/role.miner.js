@@ -88,19 +88,24 @@ var roleMiner = {
             // Получаем объект
             let target = Game.getObjectById(creep.memory.target.id);
             if (target === null) {
+                
                 creep.say(creep.memory.target.roomName);
                 let route = Game.map.findRoute(creep.room, creep.memory.target.roomName);
                 if (route.length > 0)
                     creep.moveTo(creep.pos.findClosestByRange(route[0].exit), {visualizePathStyle: {stroke: '#ffffff'}});
             }
             // Если не в радиусе одной клетки, то движемся к цели
-            else if (!CreepInObjectRadius(creep, target)) // creep.harvest(target) == ERR_NOT_IN_RANGE
-                creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
-            else
+            else if (!CreepInObjectRadius(creep, target)) { // creep.harvest(target) == ERR_NOT_IN_RANGE
+                //console.log(target.pos.x, " ", target.pos.y);
+                creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}})
+            } else
                 FindOrBuildStorage(creep, target);
         }
         
         if (creep.memory.mining) {
+            if (creep.memory.target.room != creep.room) 
+                creep.memory.mining = false;
+                
             let target = Game.getObjectById(creep.memory.target.id);
             if (creep.memory.constructionContainer) {
                 if (creep.store.getFreeCapacity(RESOURCE_ENERGY) == 0)
@@ -124,6 +129,12 @@ var roleMiner = {
             } else if (!creep.memory.container) {
                 FindOrBuildStorage(creep, target);
             } else {
+                // ЧИНИТЬ ЕСЛИ МАЛО ХП
+                // if (creep.store.getFreeCapacity() == 0) {
+                //     let container = Game.getObjectById(creep.memory.container);
+                //     if (container.hits < 200000) //container.hitsMax / 2)
+                //         creep.repair(container);
+                // }
                 creep.harvest(target); // можно оптимизировать метод getObjectById()
             }
         }

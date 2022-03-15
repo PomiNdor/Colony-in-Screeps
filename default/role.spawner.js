@@ -10,16 +10,18 @@
 const builders_countMax = 2;
 const harvesters_countMax = 2;
 const upgraders_countMax = 3;
-const miners_countMax = 4;
+const miners_countMax = 5;
 const carriers_countMax = 6;
 const carriUpgraders_countMax = 1;
 
 const harvesterParts = [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE]; //[WORK, WORK, WORK,  CARRY, CARRY, CARRY, MOVE,  MOVE];
 const builderParts   = [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE]; //[WORK, WORK, WORK,  CARRY, CARRY, MOVE,  MOVE,  MOVE];
 const upgraderParts  = [WORK, WORK, WORK, WORK,  CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE]; //[WORK, WORK, WORK,  CARRY, CARRY, CARRY, MOVE,  MOVE];
-const carrierParts   = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
+const carrierParts   = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
+                        MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE];
 const minerParts     = [WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE];
-const carriUpgraderParts = [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
+const carriUpgraderParts = [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, 
+                            MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,  MOVE,  MOVE,  MOVE];
 
 module.exports = {
     run: function(spawn) {
