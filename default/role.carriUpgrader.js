@@ -21,11 +21,18 @@ var roleUpgrader = {
         
         
 	    if(!creep.memory.upgrading) {
-	        if (creep.room.storage.store[RESOURCE_ENERGY] < 20000) {
-	            creep.moveTo(25, 22);
-	        }
-            else if(creep.withdraw(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(creep.room.storage, {visualizePathStyle: {stroke: '#ffffff'}});
+	        // if (creep.room.storage && creep.room.storage.store[RESOURCE_ENERGY] < 20000) {
+	        //     creep.moveTo(25, 22);
+	        // }
+            // else 
+            if(creep.room.storage && creep.room.storage.store[RESOURCE_ENERGY] > 20000) {
+                if (creep.withdraw(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
+                    creep.moveTo(creep.room.storage, {visualizePathStyle: {stroke: '#ffffff'}});
+            } else if (creep.room.terminal && creep.room.terminal.store[RESOURCE_ENERGY] > 100000) {
+                if (creep.withdraw(creep.room.terminal, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
+                    creep.moveTo(creep.room.terminal, {visualizePathStyle: {stroke: '#ffffff'}});
+            } else {
+                creep.moveTo(25, 22);
             }
         }
         else {

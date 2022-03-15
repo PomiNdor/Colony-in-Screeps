@@ -8,6 +8,7 @@
  */
 var moduleConstants = require('module.constants');
 var moduleFunctions = require('module.functions');
+var moduleCreep = require('module.creep');
 const rootRoom = moduleConstants.roomRootName;
 // const roomNames = moduleConstants.roomNames;
 
@@ -36,8 +37,10 @@ module.exports = {
                 creep.say(creep.memory.targetRoom);
                 
                 // Костыль, крипы застревали между комнатами
-                if (creep.memory.target) {
-                    let target = Game.getObjectById(creep.memory.target.id);
+                let target;
+                if (creep.memory.target)
+                    target = Game.getObjectById(creep.memory.target.id);
+                if (target) {
                     creep.moveTo(target);
                 } else {
                     
@@ -126,6 +129,7 @@ module.exports = {
             }
                 
         } else {
+            
             if (creep.memory.targetRoom) {
                 let room = Memory.rooms[creep.memory.targetRoom];
                 if (room) for (let i in room.carriers) {
@@ -138,12 +142,21 @@ module.exports = {
             }
             
             
-            if (creep.room.name != rootRoom) {
-                creep.say(rootRoom);
-                let route = Game.map.findRoute(creep.room, rootRoom);
-                if (route.length > 0)
-                    creep.moveTo(creep.pos.findClosestByRange(route[0].exit), {visualizePathStyle: {stroke: '#ffffff'}});
+            if (creep.room.name != creep.memory.rootRoomName) {
+                creep.say(creep.memory.rootRoomName);
+                
+                // Костыль, крипы застревали между комнатами
+                let target = Game.rooms[creep.memory.rootRoomName].storage;
+                if (target) {
+                    // console.log('storage room');
+                    creep.moveTo(target);
+                } else {
+                    let route = Game.map.findRoute(creep.room, creep.memory.rootRoomName);
+                    if (route.length > 0)
+                        creep.moveTo(creep.pos.findClosestByRange(route[0].exit), {visualizePathStyle: {stroke: '#ffffff'}});
+                }
             } else {
+                
                 let target = creep.pos.findClosestByRange(FIND_STRUCTURES, {
                         filter: (structure) => {
                             return (
@@ -156,8 +169,13 @@ module.exports = {
                     if(creep.transfer(target, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                         creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
                     }
-                } else if (creep.transfer(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
-                    creep.moveTo(creep.room.storage, {visualizePathStyle: {stroke: '#ffffff'}});
+                } 
+                else if (creep.room.storage && creep.room.storage.store.getFreeCapacity() > 0) {
+                    if (creep.transfer(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
+                        creep.moveTo(creep.room.storage, {visualizePathStyle: {stroke: '#ffffff'}});
+                }
+                else if (creep.transfer(creep.room.terminal, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
+                    creep.moveTo(creep.room.terminal, {visualizePathStyle: {stroke: '#ffffff'}});
             }
         }
     }

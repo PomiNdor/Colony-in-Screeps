@@ -21,61 +21,73 @@ room.memory:
     }, ...],
 */
 
+var moduleFunctions = require('module.functions');
+
 const rootRooms = [
-    { 
-        //1800 - 1000 - 200 - 500
+    {
         name: 'E2S17', 
         miningRooms: ['E1S17', 'E2S18', 'E1S16', 'E1S18'], // 'E1S18'
         NoSearchedRooms: [],
         
-        restPoint: {x: 16, y: 40},
-        transporters_countMax: 2,
-        transporterParts: [...(new Array(10).fill(CARRY)), ...(new Array(10).fill(MOVE))],
         
-        harvesters_countMax: 1,
-        harvesterParts: [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
-        upgraders_countMax: 1,
-        upgraderParts: [WORK, WORK, WORK, WORK,  CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
-        builders_countMax: 1,
-        builderParts: [WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE],
+        creeps: {
+            restPoint: {x: 16, y: 40},
+            transporters_countMax: 2,
+            transporterParts: [...(new Array(10).fill(CARRY)), ...(new Array(10).fill(MOVE))],
+            
+            harvesters_countMax: 0,
+            harvesterParts: [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
+            upgraders_countMax: 0,
+            upgraderParts: [WORK, WORK, WORK, WORK,  CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
+            builders_countMax: 1,
+            builderParts: [WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE],
+            
+            carrierParts: [...(new Array(15).fill(CARRY)), ...(new Array(15).fill(MOVE))],
+            minerParts: [WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE],
+            
+            carriUpgraders_countMax: 4,
+            carriUpgraderParts: [WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, 
+                                 MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE]
+        },
+        towers: {
+            minEnergy: 800,
+            maxRepairHits: 100000
+        }
         
-        carrierParts: [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
-                       MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE],
-        minerParts: [WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE],
-        
-        carriUpgraders_countMax: 4,
-        carriUpgraderParts: [WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, 
-                             MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE]
     },
     { 
         name: 'E4S17', 
-        miningRooms: [],
+        miningRooms: ['E3S17'], //['E4S18', 'E3S18', 'E3S17'],
         NoSearchedRooms: [],
         
-        restPoint: {x: 30, y: 8},
-        transporters_countMax: 1,
-        transporterParts: [...(new Array(5).fill(CARRY)), ...(new Array(5).fill(MOVE))],
-        // 1300
-        harvesters_countMax: 1,
-        harvesterParts: [WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE],
-        upgraders_countMax: 3,
-        upgraderParts: [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, 
-                        MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,  MOVE,  MOVE,  MOVE,  MOVE],
-        builders_countMax: 1,
-        builderParts: [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
-        
-        carrierParts: [],
-        minerParts: [WORK, WORK, WORK, WORK, CARRY, MOVE],
-        
-        carriUpgraders_countMax: 0,
-        carriUpgraderParts: [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, 
-                             MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,  MOVE,  MOVE,  MOVE]
+        creeps: { 
+            restPoint: {x: 30, y: 8},
+            transporters_countMax: 1,
+            transporterParts: [...(new Array(15).fill(CARRY)), ...(new Array(15).fill(MOVE))],
+            // 1800
+            harvesters_countMax: 1,
+            harvesterParts: [WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE],
+            upgraders_countMax: 1,
+            upgraderParts: [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, 
+                            MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,  MOVE,  MOVE,  MOVE,  MOVE],
+            builders_countMax: 1,
+            builderParts: [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
+            
+            carrierParts: [...(new Array(15).fill(CARRY)), ...(new Array(15).fill(MOVE))],
+            minerParts: [WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE],
+            
+            carriUpgraders_countMax: 1,
+            carriUpgraderParts: [...(new Array(8).fill(WORK)), ...(new Array(6).fill(CARRY)), ...(new Array(14).fill(MOVE))]
+        },
+        towers: {
+            minEnergy: 800,
+            maxRepairHits: 20000
+        }
     }
 ]
 
 
-
-// const roomNames = ['E1S17', 'E2S18', 'E1S16', 'E1S18']; // 'E1S18'
+var moduleVisualize = require('module.visualize');
 
 function setRootRoomsConstants() {
     Memory.rootRooms = rootRooms;
@@ -89,9 +101,10 @@ function setRootRoomsConstants() {
             let memoryRoom = Memory.rooms[roomName];
             
             if (memoryRoom && memoryRoom.resources) {
-                miners += Memory.rooms[roomName].resources.length;
+                let countMineRes = _.filter(Memory.rooms[roomName].resources, res => res.status == 'mine').length;
+                miners += countMineRes;
                 if (roomName != rootRoom.name)
-                    carriers += Memory.rooms[roomName].resources.length;
+                    carriers += countMineRes;
             }
                 
                 
@@ -124,15 +137,8 @@ function setRootRoomsConstants() {
         SetRoomConstants(rootRoom.name);
         _.forEach(rootRoom.miningRooms, miningRoom => SetRoomConstants(miningRoom));
         
-        rootRoom.miners_countMax = miners;
-        rootRoom.carriers_countMax = carriers + Math.floor(carriers / 2);
-        // if (Memory.rooms[rootRoom] && Memory.rooms[rootRoom].resources) {
-        //     rootRoom.rootMiners_countMax = Memory.rooms[rootRoom].resources.length;
-        //     rootRoom.rootCarrier_countMax = 1;
-        // } else { 
-        //     rootRoom.rootMiners_countMax  = 0;
-        //     rootRoom.rootCarrier_countMax = 0;
-        // }
+        rootRoom.creeps.miners_countMax = miners;
+        rootRoom.creeps.carriers_countMax = carriers + Math.floor(carriers / 2);
         
     };
     
@@ -169,7 +175,20 @@ var moduleRoom = {
     visualize: function(nameRoom) {
         let gameRoom = Game.rooms[nameRoom];
         if (gameRoom) {
-            //let room = Game.rooms[name];
+            let tableInfoPos = {x: 1, y: 1};
+            let tableInfoStyle = { align: 'left', opacity: 0.7, color: 'SpringGreen'};
+            // Отрисовка ресурсов комнаты
+            if (gameRoom.storage) {
+                let storageText = ['Storage: '];
+                for (let i in gameRoom.storage.store)
+                    storageText.push((i == 'energy' ? 'E' : i) + ' ' + gameRoom.storage.store[i]);
+
+                moduleVisualize.table(gameRoom, storageText, tableInfoPos, 
+                    {fill: "#212121", opacity: tableInfoStyle.opacity}, 
+                    tableInfoStyle);
+            }
+
+
             if (!gameRoom.memory.resources) SetSettings(nameRoom);
             
             gameRoom.memory.resources.forEach(res => {
@@ -191,9 +210,22 @@ var moduleRoom = {
     },
     actualize: function(nameRoom) {
         let memoryRoom = Memory.rooms[nameRoom];
+        let gameRoom = Game.rooms[nameRoom];
         if (memoryRoom && memoryRoom.resources) {
             memoryRoom.resources.forEach(res => {
                 
+                if (res.type != 'energy' && gameRoom) {
+                    let mineral = Game.getObjectById(res.id);
+                    if (mineral)
+                        res.amount = mineral.mineralAmount;
+                    
+                    let extractors = _.filter(gameRoom.lookForAt(LOOK_STRUCTURES, res.pos.x, res.pos.y),
+                                                struct => struct.structureType == STRUCTURE_EXTRACTOR);
+                    //console.log(extractors, res.pos.x, res.pos.y);
+                    res.status = res.amount > 0 && extractors.length && IsNearTo(extractors[0], res) ? 'mine' : 'notMine';
+                    res.updateDate = Game.time;
+                }
+
                 for (let i in res.creeps) {
                     // console.log('res.creeps[i].name ', res.creeps[i].name, " ", res.id);
                     // console.log((_.filter(Game.creeps, creep => creep.name == res.creeps[i].name && creep.targetId != res.id)));
@@ -210,37 +242,12 @@ var moduleRoom = {
                         }
                     }
                     
-                    // if (_.filter(Game.creeps, creep => creep.name == res.creeps[i].name && creep.targetId != res.id) )
-                    //     res.creeps.splice(i, 1);
                 }
             });
         }
         
         
         
-        // Проверка если у крипа есть цель, есть ли у цели крип?
-        // if (creep.memory.target) {
-        //     let finded = false;
-        //     for (let i in roomNames) {
-        //         if (!creep.memory.target) break;
-                
-        //         roomName = roomNames[i];
-        //         let memoryRoom = Memory.rooms[roomName];
-        //         if (memoryRoom) {
-        //             let res = _.find(memoryRoom.resources, item => item.id == creep.memory.target.id);
-                
-        //             if (res && _.find(res.creeps, resCrep => resCrep.name == creep.name))
-        //                 finded = true;
-        //         }
-        //     }
-        //     // roomNames.forEach(roomName => { });
-        //     if (!finded) {
-        //         delete creep.memory.target;
-        //         delete creep.memory.constructionContainer;
-        //         delete creep.memory.building;
-        //         delete creep.memory.container;
-        //     }
-        // }
     }
 }
 
@@ -249,22 +256,30 @@ var moduleRoom = {
 function SetSettings(nameRoom) {
     if (!Memory.rooms || !Memory.rooms[nameRoom] || !Memory.rooms[nameRoom].resources) {
         
+        let rootRoom = moduleFunctions.FindRootRoomMemory(nameRoom);
         // // Удаление delete Memory.rooms
         let gameRoom = Game.rooms[nameRoom];
-        if (!gameRoom) {
-            if (!Memory.NoSearchedRooms)
-                Memory.NoSearchedRooms = [];
-            if (!_.find(Memory.NoSearchedRooms, room => room.name == nameRoom))
-                Memory.NoSearchedRooms.push(({name: nameRoom, creepId: '' }));
+        let memoryRoom = Memory.rooms[nameRoom];
+        if (rootRoom) {
+            if (!gameRoom) {
+                if (!rootRoom.NoSearchedRooms)
+                    rootRoom.NoSearchedRooms = [];
+                if (!_.find(rootRoom.NoSearchedRooms, room => room.name == nameRoom))
+                    rootRoom.NoSearchedRooms.push(({name: nameRoom, creepId: '' }));
+            } else {
+                // Удаление из памяти не исследованных комнат
+                _.forEach(Memory.NoSearchedRooms, (room, index) => {
+                    if (room.name == nameRoom)
+                        Memory.NoSearchedRooms.splice(index, 1);
+                });
+            }
+            
+        } else {
+            console.log('module.room', 'if (rootRoom)', rootRoom);
         }
-        else {
-            
-            // Удаление из памяти не исследованных комнат
-            _.forEach(Memory.NoSearchedRooms, (room, index) => {
-                if (room.name == nameRoom)
-                    Memory.NoSearchedRooms.splice(index, 1);
-            });
-            
+        
+        
+        if (gameRoom && rootRoom) {
             
             if (!gameRoom.memory.resources) {
                 console.log("Добавление новой комнаты в память: " + nameRoom);
@@ -295,9 +310,43 @@ function SetSettings(nameRoom) {
                         updateDate: Game.time
                     });
                 });
+                // ------------------------------------- ДОБАВИЛ ЭТО
+                gameRoom.find(FIND_MINERALS).forEach(mineral => {
+                    
+                    // Удаление ИД у крипов, которые привязанны к этому источнику (возможно при очистке памяти)
+                    for (let name in Game.creeps)
+                        if (Game.creeps[name].memory.targetId == mineral.id)
+                            delete Game.creeps[name].memory.targetId;
+                    // -----------
+                    
+                    // Получение координат рядом стоящих контейнеров
+                    let containerPosition = _.map(
+                        _.filter(mineral.room.lookForAtArea(LOOK_STRUCTURES, mineral.pos.y-1, mineral.pos.x-1, mineral.pos.y+1, mineral.pos.x+1, true), 
+                            struct => struct.structure.structureType == 'container'),
+                        struct => { return {x: struct.x, y: struct.y} }
+                    );
+                    
+                    let extractors = _.filter(mineral.room.lookForAt(LOOK_STRUCTURES, mineral), struct => struct.structureType == STRUCTURE_EXTRACTOR);
+
+                    // Запись в память
+                    gameRoom.memory.resources.push({
+                        id: mineral.id,
+                        status: extractors.length && IsNearTo(extractors[0], mineral) ? 'mine' : 'notMine',
+                        pos: mineral.pos,
+                        containerPos: containerPosition,
+                        type: mineral.mineralType,
+                        amount: mineral.mineralAmount,
+                        creeps: [],
+                        updateDate: Game.time
+                    });
+                });
             }
         }
     }
+}
+
+function IsNearTo(object, target) {
+    return object.pos.x == target.pos.x && object.pos.y == target.pos.y && object.pos.roomName == target.pos.roomName;
 }
 
 function RefreshSettings(nameRoom, resourceId = '') {

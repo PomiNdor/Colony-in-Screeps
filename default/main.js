@@ -13,12 +13,10 @@ var roleTower =     require('role.tower');
 var roleTransporter =  require('role.transporter');
 // E4S17
 
-var moduleRoom =        require('module.room');
-var moduleConstants =   require('module.constants');
-
-const roomNames = moduleConstants.roomNames;  // 'E2S17'
+var moduleRoom = require('module.room');
 
 module.exports.loop = function () {
+    
     // Game.creeps['carrier_29573682'].moveTo(43, 25);
     //Game.creeps['carrier_29574074'].move(BOTTOM);
     //Game.creeps['carrier_29573682'].moveTo(44, 21);
@@ -32,7 +30,7 @@ module.exports.loop = function () {
         roleSpawner.run(Game.spawns[name]);
         
     // --------- TOWER
-    _.forEach(['60e01b8ce63ac4823ee239fc', '60e390b7e23798720459b086', '60e640959ce544f9aa0d90d6'], towerId => {
+    _.forEach(['60e01b8ce63ac4823ee239fc', '60e390b7e23798720459b086', '60e640959ce544f9aa0d90d6', '60edabefa2303239febe6f16'], towerId => {
         var tower = Game.getObjectById(towerId);
         if(tower) roleTower.run(tower);
     });
@@ -150,12 +148,48 @@ module.exports.loop = function () {
             }
         }
         
-        let damagerParts = [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE, MOVE];
+        
+        let damagerParts = [ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
+        // Game.spawns['Spawn2'].spawnCreep(damagerParts, 'damager_'+Game.time, {memory: {role: 'damager'}});
+        //let damagerParts = [TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE];
         //Game.spawns['Spawn1'].spawnCreep(damagerParts, 'damager_'+Game.time, {memory: {role: 'damager'}});
         //Game.spawns['Spawn1'].spawnCreep([ATTACK, MOVE], 'damager_'+Game.time, {memory: {role: 'damager'}});
         if (creep.memory.role == 'damager') {
             roleDamager.run(creep);
         }
+        
+        
+        if (creep.memory.role == 'testCarry') {
+            if (creep.memory.storing && creep.store.getUsedCapacity() == 0)
+                creep.memory.storing = false;
+            if (!creep.memory.storing && creep.store.getFreeCapacity() == 0)
+                creep.memory.storing = true;
+                
+            if (creep.room.name == 'E5S17') {
+                if (creep.memory.storing) {
+                    creep.moveTo(new RoomPosition(29, 8, 'E4S17'), {visualizePathStyle: {stroke: '#ffffff'}});
+                } else {
+                    let storage = Game.getObjectById('60eca82ef3bfad88c0c94955');
+                    if (creep.withdraw(storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
+                        creep.moveTo(storage, {visualizePathStyle: {stroke: '#ffffff'}});
+                }
+                    
+            } else if (creep.room.name == 'E4S17') {
+                if (creep.memory.storing) {
+                    if (creep.transfer(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
+                        creep.moveTo(creep.room.storage, {visualizePathStyle: {stroke: '#ffffff'}});
+                } else {
+                    creep.moveTo(new RoomPosition(11, 41, 'E5S17'), {visualizePathStyle: {stroke: '#ffffff'}});
+                }
+            } else {
+                if (creep.memory.storing) {
+                    creep.moveTo(new RoomPosition(29, 8, 'E4S17'), {visualizePathStyle: {stroke: '#ffffff'}});
+                } else {
+                    creep.moveTo(new RoomPosition(11, 41, 'E5S17'), {visualizePathStyle: {stroke: '#ffffff'}});
+                }
+            }
+        }
+        
         
         
     }

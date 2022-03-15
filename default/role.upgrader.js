@@ -42,8 +42,12 @@ var roleUpgrader = {
             } else if (target_container) {
                 if(creep.withdraw(target_container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
                     creep.moveTo(target_container);
-            } else if(creep.harvest(sources) == ERR_NOT_IN_RANGE) {
-                creep.moveTo(sources, {visualizePathStyle: {stroke: '#ffffff'}});
+            } else if (sources) {
+                if(creep.harvest(sources) == ERR_NOT_IN_RANGE)
+                    creep.moveTo(sources, {visualizePathStyle: {stroke: '#ffffff'}});
+            } else if (creep.room.storage && creep.room.storage.store[RESOURCE_ENERGY] > 10000) {
+                if (creep.withdraw(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
+                    creep.moveTo(creep.room.storage, {visualizePathStyle: {stroke: '#ffffff'}});
             }
         }
         else {

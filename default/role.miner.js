@@ -28,9 +28,6 @@ function FindMinRangeResources(creep, resources) {
 
 
 var roleMiner = {
-    runRoot: function() {
-        
-    },
     
     
     run: function(creep) {
@@ -39,7 +36,7 @@ var roleMiner = {
         // Проверка если у крипа есть цель, есть ли у цели крип?
         if (creep.memory.target) {
             let finded = false;
-            let rootRoom = moduleFunctions.FindRootRoomMemory(creep.memory.rootRoomName)
+            let rootRoom = moduleFunctions.FindRootRoomMemory((creep.memory.rootRoomName ? creep.memory.rootRoomName : creep.room.name));
             let roomNames = [rootRoom.name, ...rootRoom.miningRooms];
             for (let i in roomNames) {
                 if (!creep.memory.target) break;
@@ -80,9 +77,17 @@ var roleMiner = {
                 if (!target || target.room.name != creep.room.name) {
                     
                     creep.say(creep.memory.target.roomName);
-                    let route = Game.map.findRoute(creep.room, creep.memory.target.roomName);
-                    if (route.length > 0)
-                        creep.moveTo(creep.pos.findClosestByRange(route[0].exit), {visualizePathStyle: {stroke: '#ffffff'}});
+                    // Костыль, крипы застревали между комнатами
+                    let target;
+                    if (creep.memory.target)
+                        target = Game.getObjectById(creep.memory.target.id);
+                    if (target) {
+                        creep.moveTo(target);
+                    } else {
+                        let route = Game.map.findRoute(creep.room, creep.memory.target.roomName);
+                        if (route.length > 0)
+                            creep.moveTo(creep.pos.findClosestByRange(route[0].exit), {visualizePathStyle: {stroke: '#ffffff'}});
+                    }
                 }
                 // Если не в радиусе одной клетки, то движемся к цели
                 else if (!CreepInObjectRadius(creep, target)) { // creep.harvest(target) == ERR_NOT_IN_RANGE
@@ -109,8 +114,7 @@ var roleMiner = {
                             FindOrBuildStorage(creep, target);
                             delete creep.memory.constructionContainer;
                             delete creep.memory.building;
-                        }
-                        if (!constructionContainer.hits) {
+                        } else if (!constructionContainer.hits) {
                             creep.build(constructionContainer);
                         }
                     } else {
@@ -133,40 +137,41 @@ var roleMiner = {
 }
 
 function FindRoomMining(creep) {
-    let rootRoom = moduleFunctions.FindRootRoomMemory(creep.memory.rootRoomName);
+    let rootRoom = moduleFunctions.FindRootRoomMemory((creep.memory.rootRoomName ? creep.memory.rootRoomName : creep.room.name));
+    // console.log(rootRoom);
     if (rootRoom) {
         let room = Memory.rooms[rootRoom.name];
         
         //Memory.test = room;
         //console.log(roomNames[i], " ", room);
-        let resources = _.filter(room.resources, item => !(_.find(item.creeps, creep => creep.role == 'miner')));
-        //console.log('resources ', resources);
+        let resources = _.filter(room.resources, item => item.status == 'mine' && !(_.find(item.creeps, creep => creep.role == 'miner')));
+        // console.log('resources ', resources);
         if (resources && resources.length > 0) {
             let res = FindMinRangeResources(creep, resources);
             creep.memory.target = {id: res.id, roomName: rootRoom.name};
             res.creeps.push(({name: creep.name, role: creep.memory.role}));
             return;
         }
-    }
-    
-    
-    let roomNames = rootRoom.miningRooms;
-    // Перебираем все комнаты и их точки ресурсов
-    for (let i in roomNames) {
-        if (!Memory.rooms[roomNames[i]]) continue;
-        if (creep.memory.target) break;
-        
-        let room = Memory.rooms[roomNames[i]];
-        
-        //Memory.test = room;
-        //console.log(roomNames[i], " ", room);
-        let resources = _.filter(room.resources, item => !(_.find(item.creeps, creep => creep.role == 'miner')));
-        //console.log('resources ', resources);
-        if (resources && resources.length > 0) {
-            let res = FindMinRangeResources(creep, resources);
-            creep.memory.target = {id: res.id, roomName: roomNames[i]};
-            res.creeps.push(({name: creep.name, role: creep.memory.role}));
-            break;
+
+
+        let roomNames = rootRoom.miningRooms;
+        // Перебираем все комнаты и их точки ресурсов
+        for (let i in roomNames) {
+            if (!Memory.rooms[roomNames[i]]) continue;
+            if (creep.memory.target) break;
+            
+            let room = Memory.rooms[roomNames[i]];
+            
+            //Memory.test = room;
+            //console.log(roomNames[i], " ", room);
+            let resources = _.filter(room.resources, item => item.status == 'mine' && !(_.find(item.creeps, creep => creep.role == 'miner')));
+            //console.log('resources ', resources);
+            if (resources && resources.length > 0) {
+                let res = FindMinRangeResources(creep, resources);
+                creep.memory.target = {id: res.id, roomName: roomNames[i]};
+                res.creeps.push(({name: creep.name, role: creep.memory.role}));
+                break;
+            }
         }
     }
 }

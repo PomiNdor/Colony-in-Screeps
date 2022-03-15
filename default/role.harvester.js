@@ -62,8 +62,8 @@ var roleHarvester = {
                     creep.memory.harvesting = true;
                 else {
                     let rootRoom = FindRootRoom(creep.room.name);
-                    if (rootRoom && rootRoom.restPoint)
-                        creep.moveTo(rootRoom.restPoint.x, rootRoom.restPoint.y, {visualizePathStyle: {stroke: '#ffffff'}});
+                    if (rootRoom && rootRoom.creeps.restPoint)
+                        creep.moveTo(rootRoom.creeps.restPoint.x, rootRoom.creeps.restPoint.y, {visualizePathStyle: {stroke: '#ffffff'}});
                 }
             }
         }

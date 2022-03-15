@@ -9,8 +9,15 @@
 
 module.exports = {
     FindRootRoomMemory: function(roomName) {
-        for (let i in Memory.rootRooms)
+        for (let i in Memory.rootRooms) {
+            // Если это rootRoomName
             if (Memory.rootRooms[i].name == roomName)
                 return Memory.rootRooms[i];
+                
+            // Если это mineRoomName
+            for (let j in Memory.rootRooms[i].miningRooms) 
+                if (Memory.rootRooms[i].miningRooms[j] == roomName)
+                    return Memory.rootRooms[i];
+        }
     }
 };

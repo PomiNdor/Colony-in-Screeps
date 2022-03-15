@@ -23,21 +23,21 @@ module.exports = {
             return;
         }
         
-        const harvesters_countMax     = rootRoomMemory.harvesters_countMax;
-        const upgraders_countMax      = rootRoomMemory.upgraders_countMax;
-        const builders_countMax       = rootRoomMemory.builders_countMax;
-        const miners_countMax         = rootRoomMemory.miners_countMax;
-        const carriers_countMax       = rootRoomMemory.carriers_countMax;
-        const carriUpgraders_countMax = rootRoomMemory.carriUpgraders_countMax;
-        const transporters_countMax   = rootRoomMemory.transporters_countMax;
+        const harvesters_countMax     = rootRoomMemory.creeps.harvesters_countMax;
+        const upgraders_countMax      = rootRoomMemory.creeps.upgraders_countMax;
+        const builders_countMax       = rootRoomMemory.creeps.builders_countMax;
+        const miners_countMax         = rootRoomMemory.creeps.miners_countMax;
+        const carriers_countMax       = rootRoomMemory.creeps.carriers_countMax;
+        const carriUpgraders_countMax = rootRoomMemory.creeps.carriUpgraders_countMax;
+        const transporters_countMax   = rootRoomMemory.creeps.transporters_countMax;
         
-        const harvesterParts     = rootRoomMemory.harvesterParts;
-        const upgraderParts      = rootRoomMemory.upgraderParts;
-        const builderParts       = rootRoomMemory.builderParts;
-        const minerParts         = rootRoomMemory.minerParts;
-        const carrierParts       = rootRoomMemory.carrierParts;
-        const carriUpgraderParts = rootRoomMemory.carriUpgraderParts;
-        const transporterParts   = rootRoomMemory.transporterParts;
+        const harvesterParts     = rootRoomMemory.creeps.harvesterParts;
+        const upgraderParts      = rootRoomMemory.creeps.upgraderParts;
+        const builderParts       = rootRoomMemory.creeps.builderParts;
+        const minerParts         = rootRoomMemory.creeps.minerParts;
+        const carrierParts       = rootRoomMemory.creeps.carrierParts;
+        const carriUpgraderParts = rootRoomMemory.creeps.carriUpgraderParts;
+        const transporterParts   = rootRoomMemory.creeps.transporterParts;
         
         
         
@@ -56,6 +56,7 @@ module.exports = {
             carriUpgraders_count = 0,
             reservers_count = 0,
             transporters_count = 0;
+            // testCarry_count = 0;
             
             
         // Подсчет крипов
@@ -63,6 +64,9 @@ module.exports = {
             var creep = Game.creeps[name];
             let creepIsThisRooms = creep.room.name == spawn.room.name;
             
+            // if (creep.memory.role == 'testCarry') 
+            //     testCarry_count++;
+                
             for (let i in rootRoomMemory.miningRooms)
                 if (creep.room.name == rootRoomMemory.miningRooms[i])
                     creepIsThisRooms = true;
@@ -104,10 +108,14 @@ module.exports = {
         //console.log(miners_count, ' ', miners_countMax);
         // Спавн новых если нужно
         
+        // TestCarryParts
+        let carryParts = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, 
+                          MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE];
         
         if (spawn.spawning == null) {
             //console.log(harvesters_count + " " + builders_count + " " + upgraders_count);
-            
+            // if (spawn.name == 'Spawn2' && testCarry_count < 2)
+            //     SpawnCreep(spawn, carryParts, 'testCarry');
             
             
             if (searchers_count == 0 && rootRoomMemory.NoSearchedRooms && rootRoomMemory.NoSearchedRooms.length > 0) 
@@ -134,10 +142,11 @@ module.exports = {
             else if (builders_count < builders_countMax && spawn.room.find(FIND_CONSTRUCTION_SITES).length > 0)
                 SpawnCreep(spawn, builderParts, 'builder');
             
-            else if (carriUpgraders_count < carriUpgraders_countMax && spawn.room.storage.store[RESOURCE_ENERGY] >= 30000)
+            else if (carriUpgraders_count < carriUpgraders_countMax && (
+                (spawn.room.storage && spawn.room.storage.store[RESOURCE_ENERGY] >= 30000) 
+                || (spawn.room.terminal && spawn.room.terminal.store[RESOURCE_ENERGY] >= 100000)))
                 SpawnCreep(spawn, carriUpgraderParts, 'carriUpgrader');
-            
-            
+                
             
         }
     }

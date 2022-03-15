@@ -55,6 +55,10 @@ var roleBuilder = {
 	            if(creep.withdraw(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(creep.room.storage, {visualizePathStyle: {stroke: builderColor}});
                 }
+	        } else if (creep.room.terminal && creep.room.terminal.store[RESOURCE_ENERGY] > 10000) {
+	            if(creep.withdraw(creep.room.terminal, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(creep.room.terminal, {visualizePathStyle: {stroke: builderColor}});
+                }
 	        } else {
 	            var sources = creep.room.find(FIND_SOURCES_ACTIVE); //creep.room.find(FIND_SOURCES_ACTIVE);
                 if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE)
