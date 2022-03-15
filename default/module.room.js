@@ -26,9 +26,11 @@ var moduleFunctions = require('module.functions');
 const rootRooms = [
     {
         name: 'E2S17', 
-        miningRooms: ['E1S17', 'E2S18', 'E1S16', 'E1S18'], // 'E1S18'
+        miningRooms: ['E1S17', 'E2S18', 'E1S18'], // , 'E1S16'
         NoSearchedRooms: [],
-        
+        mining: true,
+        reserving: true,
+        reservingMinTick: 3000,
         
         creeps: {
             restPoint: {x: 16, y: 40},
@@ -37,33 +39,42 @@ const rootRooms = [
             
             harvesters_countMax: 0,
             harvesterParts: [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
-            upgraders_countMax: 0,
-            upgraderParts: [WORK, WORK, WORK, WORK,  CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
-            builders_countMax: 1,
-            builderParts: [WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE],
+            upgraders_countMax: 1,
+            upgraderParts: [WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
+            builders_countMax: 2,
+            builderParts: [...(new Array(10).fill(WORK)), ...(new Array(10).fill(CARRY)), ...(new Array(20).fill(MOVE))],
             
-            carrierParts: [...(new Array(15).fill(CARRY)), ...(new Array(15).fill(MOVE))],
+            carrierParts: [...(new Array(20).fill(CARRY)), ...(new Array(20).fill(MOVE))],
             minerParts: [WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE],
+            reserverParts: [...(new Array(6).fill(MOVE)), 
+                CLAIM, CLAIM, CLAIM, MOVE, MOVE, MOVE], // 300 1800 150 = 2250
+
+            carriUpgraders_countMax: 0,
+            carriUpgraderParts: [...(new Array(15).fill(WORK)), CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
             
-            carriUpgraders_countMax: 4,
-            carriUpgraderParts: [WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, 
-                                 MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE]
+            depositMiners_countMax: 1,
+            depositMinerParts: [...(new Array(12).fill(WORK)), 
+                                ...(new Array(5).fill(CARRY)), 
+                                ...(new Array(17).fill(MOVE))]
         },
         towers: {
             minEnergy: 800,
-            maxRepairHits: 100000
+            maxRepairHits: 200000
         }
         
     },
     { 
         name: 'E4S17', 
-        miningRooms: ['E3S17'], //['E4S18', 'E3S18', 'E3S17'],
+        miningRooms: ['E4S18', 'E3S18', 'E3S17'],
         NoSearchedRooms: [],
+        mining: true,
+        reserving: false,
+        reservingMinTick: 1000,
         
         creeps: { 
-            restPoint: {x: 30, y: 8},
-            transporters_countMax: 1,
-            transporterParts: [...(new Array(15).fill(CARRY)), ...(new Array(15).fill(MOVE))],
+            restPoint: {x: 31, y: 8},
+            transporters_countMax: 2,
+            transporterParts: [...(new Array(10).fill(CARRY)), ...(new Array(10).fill(MOVE))],
             // 1800
             harvesters_countMax: 1,
             harvesterParts: [WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE],
@@ -75,9 +86,53 @@ const rootRooms = [
             
             carrierParts: [...(new Array(15).fill(CARRY)), ...(new Array(15).fill(MOVE))],
             minerParts: [WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE],
+            reserverParts: [],
             
             carriUpgraders_countMax: 1,
-            carriUpgraderParts: [...(new Array(8).fill(WORK)), ...(new Array(6).fill(CARRY)), ...(new Array(14).fill(MOVE))]
+            carriUpgraderParts: [...(new Array(8).fill(WORK)), ...(new Array(6).fill(CARRY)), ...(new Array(14).fill(MOVE))],
+            
+            depositMiners_countMax: 0,
+            depositMinerParts: [...(new Array(12).fill(WORK)), 
+                                ...(new Array(5).fill(CARRY)), 
+                                ...(new Array(17).fill(MOVE))]
+        },
+        towers: {
+            minEnergy: 800,
+            maxRepairHits: 50000
+        }
+    },
+    { 
+        name: 'E3S16', 
+        miningRooms: [],//['E2S16'],
+        NoSearchedRooms: [],
+        mining: true,
+        reserving: false,
+        reservingMinTick: 1000,
+        
+        creeps: { 
+            restPoint: {x: 14, y: 39},
+            transporters_countMax: 0,
+            transporterParts: [...(new Array(15).fill(CARRY)), ...(new Array(15).fill(MOVE))],
+            // 1300
+            harvesters_countMax: 1,
+            harvesterParts: [WORK, WORK, CARRY, MOVE, MOVE, MOVE], //[WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE],
+            upgraders_countMax: 1,
+            upgraderParts: [...(new Array(10).fill(WORK)), CARRY, CARRY, MOVE], //[WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, 
+                            //MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,  MOVE,  MOVE,  MOVE,  MOVE],
+            builders_countMax: 1,
+            builderParts: [WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE], //[WORK, WORK, WORK, WORK, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],
+            
+            carrierParts: [...(new Array(7).fill(CARRY)), ...(new Array(7).fill(MOVE))],
+            minerParts: [WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE],
+            reserverParts: [],
+            
+            carriUpgraders_countMax: 1,
+            carriUpgraderParts: [...(new Array(8).fill(WORK)), ...(new Array(1).fill(CARRY)), ...(new Array(3).fill(MOVE))],
+            
+            depositMiners_countMax: 0,
+            depositMinerParts: [...(new Array(12).fill(WORK)), 
+                                ...(new Array(5).fill(CARRY)), 
+                                ...(new Array(17).fill(MOVE))]
         },
         towers: {
             minEnergy: 800,
@@ -89,48 +144,89 @@ const rootRooms = [
 
 var moduleVisualize = require('module.visualize');
 
+// Установка констант: 
+// кол-во крипов на роль; 
+// подсчет ресов в комнатах
 function setRootRoomsConstants() {
+    Memory.username = 'Pomidor';
     Memory.rootRooms = rootRooms;
     for (let i in Memory.rootRooms) {
         let rootRoom = Memory.rootRooms[i];
        
         let miners = 0;
         let carriers = 0;
+        let reservers = 0;
         let SetRoomConstants = function(roomName) {
             
             let memoryRoom = Memory.rooms[roomName];
-            
+            let gameRoom = Game.rooms[roomName];
+            // Если к комнате привязаны грузчики, привязаны ли к грузчикам комнаты
+            // Надо тестить, возможно где-то раньше уже происходит проверка
+            let CreepsAttachedToRoom = function(memoryRoomCreeps, roomName) {
+                for (let i in memoryRoomCreeps) {
+                    let creep = Game.creeps[memoryRoomCreeps[i]];
+                    if (!creep || creep.memory.targetRoom != roomName) {
+                        // console.log('Удаляю ', memoryRoomCreeps[i], ' ', creep);
+                        memoryRoomCreeps.splice(i, 1);
+                    }
+                }
+            }
+            if (memoryRoom && memoryRoom.carriers)
+                CreepsAttachedToRoom(memoryRoom.carriers, roomName);
+            if (memoryRoom && memoryRoom.reservers)
+                CreepsAttachedToRoom(memoryRoom.reservers, roomName);
+
+            // if (memoryRoom && memoryRoom.carriers) {
+            //     for (let i in memoryRoom.carriers) {
+            //         let carryCreep = Game.creeps[memoryRoom.carriers[i]];
+            //         if (!carryCreep || carryCreep.memory.targetRoom != roomName) {
+            //             console.log('Удаляю ', memoryRoom.carriers[i], ' ', carryCreep);
+            //             memoryRoom.carriers.splice(i, 1);
+            //         }
+            //     }
+            // }
+            // // Если к комнате привязаны резерваторы, привязаны ли к резерваторам комнаты
+            // if (memoryRoom && memoryRoom.reservers) {
+            //     for (let i in memoryRoom.reservers) {
+            //         let reserverCreep = Game.creeps[memoryRoom.reservers[i]];
+            //         if (!reserverCreep || reserverCreep.memory.targetRoom != roomName) {
+            //             console.log('Удаляю ', memoryRoom.reservers[i], ' ', reserverCreep);
+            //             memoryRoom.reservers.splice(i, 1);
+            //         }
+            //     }
+            // }
+
             if (memoryRoom && memoryRoom.resources) {
                 let countMineRes = _.filter(Memory.rooms[roomName].resources, res => res.status == 'mine').length;
                 miners += countMineRes;
                 if (roomName != rootRoom.name)
                     carriers += countMineRes;
             }
-                
-                
-            // Если к комнате привязаны грузчики, привязаны ли к грузчикам комнаты
-            if (memoryRoom && memoryRoom.carriers) {
-                for (let i in memoryRoom.carriers) {
-                    let carryCreep = Game.creeps[memoryRoom.carriers[i]];
-                    if (!carryCreep || carryCreep.memory.targetRoom != roomName) {
-                        // console.log('Удаляю ', memoryRoom.carriers[i], ' ', carryCreep);
-                        memoryRoom.carriers.splice(i, 1);
-                    }
-                }
+            if (gameRoom && gameRoom.controller && rootRoom.reserving) {
+                let hostile_attack_creeps = gameRoom.find(FIND_HOSTILE_CREEPS, 
+                    {filter: creep => creep.body.find(part => part.type == ATTACK || part.type == RANGED_ATTACK)});
+
+                let controller = gameRoom.controller;
+                // Если в комнате нет враждебных крипов, и контроллер свободен и резервация меньше минимальной
+                if (!hostile_attack_creeps || hostile_attack_creeps.length == 0
+                    && !controller.owner && (!controller.reservation || 
+                    (controller.reservation.username == Memory.username 
+                    && controller.reservation.ticksToEnd < rootRoom.reservingMinTick)))
+                    reservers++;    // Количество резерваторов
             }
             
+            
             // Подсчет ресов в комнате
-            var room = Game.rooms[roomName];
             let roomCountRes = 0;
-            if (room) {
-                _.forEach(room.find(FIND_DROPPED_RESOURCES), dropped_res => {
+            if (gameRoom) {
+                _.forEach(gameRoom.find(FIND_DROPPED_RESOURCES), dropped_res => {
                     roomCountRes += dropped_res.amount;
                 });
-                _.forEach(room.find(FIND_STRUCTURES, {filter: struct => struct.structureType == 'container'}), container => {
+                _.forEach(gameRoom.find(FIND_STRUCTURES, {filter: struct => struct.structureType == 'container'}), container => {
                     roomCountRes += container.store[RESOURCE_ENERGY];
                 });
                 
-                room.memory.countResEnergy = roomCountRes;
+                gameRoom.memory.countResEnergy = roomCountRes;
             }
         }
         
@@ -138,7 +234,11 @@ function setRootRoomsConstants() {
         _.forEach(rootRoom.miningRooms, miningRoom => SetRoomConstants(miningRoom));
         
         rootRoom.creeps.miners_countMax = miners;
-        rootRoom.creeps.carriers_countMax = carriers + Math.floor(carriers / 2);
+        rootRoom.creeps.reservers_countMax = reservers;
+        if (rootRoom.reserving)
+            rootRoom.creeps.carriers_countMax = carriers + Math.floor(carriers / 4 * 3); //carriers * 2;
+        else
+            rootRoom.creeps.carriers_countMax = carriers + Math.floor(carriers / 2);
         
     };
     
@@ -212,35 +312,53 @@ var moduleRoom = {
         let memoryRoom = Memory.rooms[nameRoom];
         let gameRoom = Game.rooms[nameRoom];
         if (memoryRoom && memoryRoom.resources) {
+            if (!memoryRoom.resourcesHarvestCount)
+                memoryRoom.resourcesHarvestCount = 0;
+
+
             memoryRoom.resources.forEach(res => {
-                
-                if (res.type != 'energy' && gameRoom) {
-                    let mineral = Game.getObjectById(res.id);
-                    if (mineral)
-                        res.amount = mineral.mineralAmount;
-                    
-                    let extractors = _.filter(gameRoom.lookForAt(LOOK_STRUCTURES, res.pos.x, res.pos.y),
-                                                struct => struct.structureType == STRUCTURE_EXTRACTOR);
-                    //console.log(extractors, res.pos.x, res.pos.y);
-                    res.status = res.amount > 0 && extractors.length && IsNearTo(extractors[0], res) ? 'mine' : 'notMine';
-                    res.updateDate = Game.time;
+                if (gameRoom) {
+                    if (res.type == 'energy') {
+                        let resource = Game.getObjectById(res.id);
+                        if (resource && resource.ticksToRegeneration == 1)
+                            memoryRoom.resourcesHarvestCount += resource.energyCapacity - resource.energy;
+                    } else {
+                        let mineral = Game.getObjectById(res.id);
+                        if (mineral)
+                            res.amount = mineral.mineralAmount;
+                        
+                        let extractors = _.filter(gameRoom.lookForAt(LOOK_STRUCTURES, res.pos.x, res.pos.y),
+                                                    struct => struct.structureType == STRUCTURE_EXTRACTOR);
+                        //console.log(extractors, res.pos.x, res.pos.y);
+                        res.status = res.amount > 0 && extractors.length && IsNearTo(extractors[0], res) ? 'mine' : 'notMine';
+                        res.updateDate = Game.time;
+                    }
                 }
+
+                
+
+
+
 
                 for (let i in res.creeps) {
                     // console.log('res.creeps[i].name ', res.creeps[i].name, " ", res.id);
                     // console.log((_.filter(Game.creeps, creep => creep.name == res.creeps[i].name && creep.targetId != res.id)));
                     
-                    for (var gameCreepName in Game.creeps) {
-                        
-                        if (gameCreepName == res.creeps[i].name) {
-                            // console.log('gameCreepName == res.creeps[i].name ', gameCreepName);
-                            // console.log('Game.creeps[gameCreepName].target.id ', Game.creeps[gameCreepName].memory.target);
-                            if (!Game.creeps[gameCreepName].memory.target || Game.creeps[gameCreepName].memory.target.id != res.id){
-                                res.creeps.splice(i, 1);
-                                break;
-                            }
-                        }
+                    let creep = Game.creeps[res.creeps[i].name];
+                    if (creep === undefined || creep.memory.target.id != res.id) {
+                        res.creeps.splice(i, 1);
                     }
+                    // for (var gameCreepName in Game.creeps) {
+                        
+                    //     if (gameCreepName == res.creeps[i].name) {
+                    //         // console.log('gameCreepName == res.creeps[i].name ', gameCreepName);
+                    //         // console.log('Game.creeps[gameCreepName].target.id ', Game.creeps[gameCreepName].memory.target);
+                    //         if (!Game.creeps[gameCreepName].memory.target || Game.creeps[gameCreepName].memory.target.id != res.id){
+                    //             res.creeps.splice(i, 1);
+                    //             break;
+                    //         }
+                    //     }
+                    // }
                     
                 }
             });

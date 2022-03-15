@@ -13,7 +13,8 @@ module.exports = {
     // 
     // moveTo: function(pos, opts = {}) { }
     
-    puttingResources: function(creep, moveOpts = { visualizePathStyle: {stroke: '#ffffff'} }) {
+    // Положить ресурсы
+    putResourcesInBase: function(creep, moveOpts = { visualizePathStyle: {stroke: '#ffffff'} }) {
         
         let spawnOrExtension = creep.pos.findClosestByRange(FIND_STRUCTURES, {
             filter: (structure) => {

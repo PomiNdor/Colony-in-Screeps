@@ -22,7 +22,10 @@ var roleUpgrader = {
         
         
 	    if(!creep.memory.upgrading) {
-	        let target_resource = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES);
+            // Фильтр не протестил
+	        let target_resource = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES, {filter: res => {
+                return res.resourceType == RESOURCE_ENERGY;
+            }});
             let target_container = creep.pos.findClosestByRange(FIND_STRUCTURES, { filter: (structure) => { 
                 return structure.structureType == STRUCTURE_CONTAINER && structure.store[RESOURCE_ENERGY] >= 100;
             }});

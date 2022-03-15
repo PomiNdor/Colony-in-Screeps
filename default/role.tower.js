@@ -32,3 +32,23 @@ module.exports = {
         }
     }
 };
+
+
+
+
+
+
+/*
+var towerRangeImpactFactor = function(distance) {
+    if(distance <= TOWER_OPTIMAL_RANGE) {
+        return 1
+    }
+    if(distance >= TOWER_FALLOFF_RANGE) {
+        return 1 - TOWER_FALLOFF
+    }
+    var towerFalloffPerTile = TOWER_FALLOFF / (TOWER_FALLOFF_RANGE - TOWER_OPTIMAL_RANGE)
+    return 1 - (distance - TOWER_OPTIMAL_RANGE) * towerFalloffPerTile
+}
+
+var damage = TOWER_POWER_ATTACK * towerRangeImpactFactor(distance)
+*/

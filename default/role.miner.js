@@ -7,7 +7,7 @@
  * mod.thing == 'a thing'; // true
  */
 
-var moduleConstants = require('module.constants');
+// var moduleConstants = require('module.constants');
 var moduleFunctions = require('module.functions');
 // const roomNames = moduleConstants.roomNames;
 

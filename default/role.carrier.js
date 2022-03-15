@@ -6,10 +6,10 @@
  * var mod = require('role.carrier');
  * mod.thing == 'a thing'; // true
  */
-var moduleConstants = require('module.constants');
+// var moduleConstants = require('module.constants');
 var moduleFunctions = require('module.functions');
 var moduleCreep = require('module.creep');
-const rootRoom = moduleConstants.roomRootName;
+// const rootRoom = moduleConstants.roomRootName;
 // const roomNames = moduleConstants.roomNames;
 
 module.exports = {
@@ -24,16 +24,45 @@ module.exports = {
             creep.memory.storing = false;
         }
         
+        // if (creep.hits < creep.hitsMax) {
+        //     if (creep.memory.targetRoom) {
+        //         let room = Memory.rooms[creep.memory.targetRoom];
+        //         if (room) for (let i in room.carriers) {
+        //             if (room.carriers[i] == creep.name) {
+        //                 room.carriers.splice(i, 1);
+        //                 delete creep.memory.targetRoom;
+        //                 break;
+        //             }
+        //         }
+        //     }
+        //     if (creep.room.name != creep.memory.rootRoomName) {
+        //         creep.say(creep.memory.rootRoomName);
+                
+        //         // Костыль, крипы застревали между комнатами
+        //         let target = Game.rooms[creep.memory.rootRoomName].storage;
+        //         if (target) {
+        //             // console.log('storage room');
+        //             creep.moveTo(target, {visualizePathStyle: {stroke: '#ffffff'}});
+        //         } else {
+        //             let route = Game.map.findRoute(creep.room, creep.memory.rootRoomName);
+        //             if (route.length > 0)
+        //                 creep.moveTo(creep.pos.findClosestByRange(route[0].exit), {visualizePathStyle: {stroke: '#ffffff'}});
+        //         }
+        //     }
+        // } else 
         if (!creep.memory.storing) {
             if (!creep.memory.targetRoom) {
                 creep.say("Find room!");
                 let room = FindRoomForCarrier(creep);
-                if (room) creep.memory.targetRoom = room.name;
-                else {
+                if (room) {
+                    room.memory.carriers.push(creep.name);
+                    creep.memory.targetRoom = room.name;
+                } else {
                     creep.moveTo(15, 32);
                     return;
                 }
-            } else if (creep.room.name != creep.memory.targetRoom) {
+            }
+            if (creep.room.name != creep.memory.targetRoom) {
                 creep.say(creep.memory.targetRoom);
                 
                 // Костыль, крипы застревали между комнатами
@@ -47,11 +76,7 @@ module.exports = {
                     let route = Game.map.findRoute(creep.room, creep.memory.targetRoom);
                     if (route.length > 0)
                         creep.moveTo(creep.pos.findClosestByRange(route[0].exit), {visualizePathStyle: {stroke: '#ffffff'}})
-                }
-                
-                
-                
-                      
+                }      
                     
             } else {
                 
@@ -190,8 +215,11 @@ function FindRoomForCarrier(creep) {
     for (let i in roomNames) {
         var room = Game.rooms[roomNames[i]];
         if (room) {
+            let hostile_attack_creeps = room.find(FIND_HOSTILE_CREEPS, {filter: creep => creep.body.find(part => part.type == ATTACK || part.type == RANGED_ATTACK)});
             if (!room.memory.carriers) room.memory.carriers = [];
-            minigRooms.push(room);
+            
+            if (!hostile_attack_creeps || hostile_attack_creeps.length == 0)
+                minigRooms.push(room);
         }   
     }
     
@@ -199,11 +227,8 @@ function FindRoomForCarrier(creep) {
     minigRooms.sort((b,a) => (a.memory.countResEnergy - a.memory.carriers.length * creep.store.getCapacity())
             - (b.memory.countResEnergy - b.memory.carriers.length * creep.store.getCapacity()));
     
-    if (minigRooms.length > 0) {
-        // console.log(minigRooms[0],' push ', creep.name);
-        minigRooms[0].memory.carriers.push(creep.name);
+    if (minigRooms.length > 0)
         return minigRooms[0];
-    }
     
     // for (var i in roomNames) {
     //     var room = Game.rooms[roomNames[i]];

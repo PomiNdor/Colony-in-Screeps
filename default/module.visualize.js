@@ -61,4 +61,10 @@ module.exports = {
             gameRoom.visual.text(text, pos.x, pos.y++, styleText);
         }
     },
+    showGrid: function(gameRoom, lineStyle = {width: 0.005, color: '#fff', opacity: 0.4}) {
+        for (let i = 1; i < 50; i++) {
+            gameRoom.visual.line(i - 0.5, -0.5, i - 0.5, 49.5, lineStyle);
+            gameRoom.visual.line(-0.5, i - 0.5, 49.5, i - 0.5, lineStyle);
+        }
+    }
 };
