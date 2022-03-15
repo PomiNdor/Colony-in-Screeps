@@ -27,6 +27,12 @@ function FindMinRangeResources(creep, resources) {
 
 
 var roleMiner = {
+    runRoot: function(creep) {
+        
+    },
+    
+    
+    
     run: function(creep) {
         if (creep.spawning) return;
         
@@ -103,7 +109,7 @@ var roleMiner = {
         }
         
         if (creep.memory.mining) {
-            if (creep.memory.target.room != creep.room) 
+            if (creep.memory.target.roomName != creep.room.name)
                 creep.memory.mining = false;
                 
             let target = Game.getObjectById(creep.memory.target.id);

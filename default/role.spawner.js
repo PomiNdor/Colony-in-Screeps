@@ -7,40 +7,66 @@
  * mod.thing == 'a thing'; // true
  */
  
-const builders_countMax = 2;
-const harvesters_countMax = 2;
-const upgraders_countMax = 3;
-const miners_countMax = 5;
-const carriers_countMax = 6;
-const carriUpgraders_countMax = 1;
 
-const harvesterParts = [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE]; //[WORK, WORK, WORK,  CARRY, CARRY, CARRY, MOVE,  MOVE];
-const builderParts   = [WORK, WORK, WORK, CARRY, CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE]; //[WORK, WORK, WORK,  CARRY, CARRY, MOVE,  MOVE,  MOVE];
-const upgraderParts  = [WORK, WORK, WORK, WORK,  CARRY, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE]; //[WORK, WORK, WORK,  CARRY, CARRY, CARRY, MOVE,  MOVE];
-const carrierParts   = [CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY, CARRY,
-                        MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE,  MOVE];
-const minerParts     = [WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE];
-const carriUpgraderParts = [WORK, WORK, WORK, WORK, WORK, WORK, CARRY, CARRY, CARRY, CARRY, 
-                            MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE,  MOVE,  MOVE,  MOVE];
 
 module.exports = {
     run: function(spawn) {
+        
+        let rootRoomMemory;
+        for(let i in Memory.rootRooms)
+            if (Memory.rootRooms[i].name == spawn.room.name) {
+                rootRoomMemory = Memory.rootRooms[i];
+                break;
+            }
+        if (!rootRoomMemory) {
+            console.log("Ошибки считывания памяти комнаты ", spawn.room.name);
+            return;
+        }
+        
+        const harvesters_countMax     = rootRoomMemory.harvesters_countMax;
+        const upgraders_countMax      = rootRoomMemory.upgraders_countMax;
+        const builders_countMax       = rootRoomMemory.builders_countMax;
+        const miners_countMax         = rootRoomMemory.miners_countMax;
+        const carriers_countMax       = rootRoomMemory.carriers_countMax;
+        const carriUpgraders_countMax = rootRoomMemory.carriUpgraders_countMax;
+        
+        const harvesterParts     = rootRoomMemory.harvesterParts;
+        const upgraderParts      = rootRoomMemory.upgraderParts;
+        const builderParts       = rootRoomMemory.builderParts;
+        const minerParts         = rootRoomMemory.minerParts;
+        const carrierParts       = rootRoomMemory.carrierParts;
+        const carriUpgraderParts = rootRoomMemory.carriUpgraderParts;
+        
+        
+        
+        
+        
         // Удаление старых крипов из памяти
         for (var name in Memory.creeps)
             if (!Game.creeps[name]) DeleteCreepInMemory(name);
         
         var builders_count = 0,
             upgraders_count = 0,
-            harvesters_count = 0
+            harvesters_count = 0,
             searchers_count = 0,
             miners_count = 0,
             carriers_count = 0,
             carriUpgraders_count = 0;
+            //droppers_count = 0;
             
             
         // Подсчет крипов
         for(var name in Game.creeps) {
             var creep = Game.creeps[name];
+            
+            let creepIsThisRooms = creep.room.name == spawn.room.name;
+            
+            for (let i in rootRoomMemory.miningRooms)
+                if (creep.room.name == rootRoomMemory.miningRooms[i])
+                    creepIsThisRooms = true;
+            
+            if (!creepIsThisRooms) continue;
+            
             if(creep.memory.role == 'harvester')
                 harvesters_count++;
             if(creep.memory.role == 'builder')
@@ -55,38 +81,63 @@ module.exports = {
                 carriers_count++;
             if(creep.memory.role == 'carriUpgrader')
                 carriUpgraders_count++;
+            // if(creep.memory.role == 'dropper')
+            //     droppers_count++;
+                
         }
+        if (spawn.name == 'Spawn2') {
+            
+        console.log('harvesters_count ',harvesters_count, " ", harvesters_countMax);
+        console.log('builders_count ',builders_count, " ", builders_countMax, " ", builderParts);
+        console.log('upgraders_count ',upgraders_count, " ", upgraders_countMax);
+        console.log('searchers_count ',searchers_count, " ", 0);
+        console.log('miners_count ',miners_count, " ", miners_countMax);
+        console.log('carriers_count ',carriers_count, " ", carriers_countMax);
+        console.log('carriUpgraders_count ',carriUpgraders_count, " ", carriUpgraders_countMax);
+        console.log('ddd ', (builders_count < builders_countMax && spawn.room.find(FIND_CONSTRUCTION_SITES).length > 0));
+        }
+        
+        //console.log(miners_count, ' ', miners_countMax);
         // Спавн новых если нужно
+        
+        
         if (spawn.spawning == null) {
+            console.log('spawn');
             //console.log(harvesters_count + " " + builders_count + " " + upgraders_count);
             
-            if (searchers_count == 0 && Memory.NoSearchedRooms && Memory.NoSearchedRooms.length > 0) 
-                spawn.spawnCreep([MOVE], 'searcher_'+Game.time.toString(), {memory: {role: 'searcher'}});
+            //if (droppers_count == 0) SpawnCreep(spawn, [CARRY, MOVE], 'dropper');
+            
+            if (searchers_count == 0 && rootRoomMemory.NoSearchedRooms && rootRoomMemory.NoSearchedRooms.length > 0) 
+                SpawnCreep(spawn, [MOVE], 'searcher');
                 
             else if (harvesters_count < harvesters_countMax)
-                spawn.spawnCreep(harvesterParts, 'harvester_'+Game.time.toString(), {memory: {role: 'harvester'}});
+                SpawnCreep(spawn, harvesterParts, 'harvester');
                 
-            else if (miners_count < miners_countMax) {
-                spawn.spawnCreep(minerParts, 'miner_'+Game.time.toString(), {memory: {role: 'miner'}});
-            }
-            else if (carriers_count < carriers_countMax) {
-                spawn.spawnCreep(carrierParts, 'carrier_'+Game.time.toString(), {memory: {role: 'carrier'}});
-            }
+            else if (miners_count < miners_countMax) 
+                SpawnCreep(spawn, minerParts, 'miner');
+            
+            else if (carriers_count < carriers_countMax) 
+                SpawnCreep(spawn, carrierParts, 'carrier');
             
             else if (upgraders_count < upgraders_countMax)
-                spawn.spawnCreep(upgraderParts, 'upgrader_'+Game.time.toString(), {memory: {role: 'upgrader'}});
-            
-            else if (carriUpgraders_count < carriUpgraders_countMax) {
-                spawn.spawnCreep(carriUpgraderParts, 'carriUpgrader_'+Game.time.toString(), {memory: {role: 'carriUpgrader'}});
-            }
-            
-            else if (builders_count < builders_countMax && spawn.room.find(FIND_CONSTRUCTION_SITES).length != 0) {
-                spawn.spawnCreep(builderParts, 'builder_'+Game.time.toString(), {memory: {role: 'builder'}});
-            }
+                SpawnCreep(spawn, upgraderParts, 'upgrader');
                 
+            else if (builders_count < builders_countMax && spawn.room.find(FIND_CONSTRUCTION_SITES).length > 0)
+                SpawnCreep(spawn, builderParts, 'builder');
+            
+            else if (carriUpgraders_count < carriUpgraders_countMax)
+                SpawnCreep(spawn, carriUpgraderParts, 'carriUpgrader');
+            
+            
+            
         }
     }
 };
+
+function SpawnCreep(spawn, _parts, _role) {
+    spawn.spawnCreep( _parts, _role+'_'+Game.time.toString(), { memory: {role: _role, rootRoomName: spawn.room.name }} );
+}
+
 
 function DeleteCreepInMemory(creepName) {
     console.log("Удаление несуществующего крипа из памяти! " + creepName);

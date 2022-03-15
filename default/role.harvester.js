@@ -19,7 +19,7 @@ var roleHarvester = {
             }
         }
         else {
-            let targets = creep.room.find(FIND_STRUCTURES, {
+            let targets_spawns = creep.room.find(FIND_STRUCTURES, {
                     filter: (structure) => {
                         return (
                             structure.structureType == STRUCTURE_EXTENSION || 
@@ -32,15 +32,22 @@ var roleHarvester = {
                                 structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
                     }
             });
+            towers.sort((a,b) => a.store[RESOURCE_ENERGY] - b.store[RESOURCE_ENERGY]);
+            
             let storage = creep.room.find(FIND_STRUCTURES, { filter: (structure) => {
                         return  structure.structureType == STRUCTURE_STORAGE &&
                                 structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
                     }
             });
             
-            if(targets.length > 0) {
-                if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#ffffff'}});
+            if (towers.length > 0 && towers[0].store[RESOURCE_ENERGY] < 700) {
+                if(creep.transfer(towers[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(towers[0], {visualizePathStyle: {stroke: '#ffffff'}});
+                }
+            }
+            else if(targets_spawns.length > 0) {
+                if(creep.transfer(targets_spawns[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(targets_spawns[0], {visualizePathStyle: {stroke: '#ffffff'}});
                 }
             } else if(towers.length > 0) {
                 if(creep.transfer(towers[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
@@ -53,7 +60,11 @@ var roleHarvester = {
             } else {
                 if (creep.store.getFreeCapacity() > 0)
                     creep.memory.harvesting = true;
-                else creep.moveTo(16,40, {visualizePathStyle: {stroke: '#ffffff'}});
+                else {
+                    let rootRoom = FindRootRoom(creep.room.name);
+                    if (rootRoom && rootRoom.restPoint)
+                        creep.moveTo(rootRoom.restPoint.x, rootRoom.restPoint.y, {visualizePathStyle: {stroke: '#ffffff'}});
+                }
             }
         }
 	}
@@ -61,35 +72,9 @@ var roleHarvester = {
 
 module.exports = roleHarvester;
 
-
-
-
-// var roleHarvester = {
-
-//     /** @param {Creep} creep **/
-//     run: function(creep) {
-// 	    if(creep.store.getFreeCapacity() > 0) {
-//             var sources = creep.room.find(FIND_SOURCES);
-//             if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
-//                 creep.moveTo(sources[0], {visualizePathStyle: {stroke: '#ffaa00'}});
-//             }
-//         }
-//         else {
-//             var targets = creep.room.find(FIND_STRUCTURES, {
-//                     filter: (structure) => {
-//                         return (structure.structureType == STRUCTURE_TOWER || 
-//                                 structure.structureType == STRUCTURE_EXTENSION || 
-//                                 structure.structureType == STRUCTURE_SPAWN) &&
-//                             structure.store.getFreeCapacity(RESOURCE_ENERGY) > 0;
-//                     }
-//             });
-//             if(targets.length > 0) {
-//                 if(creep.transfer(targets[0], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-//                     creep.moveTo(targets[0], {visualizePathStyle: {stroke: '#ffffff'}});
-//                 }
-//             }
-//         }
-// 	}
-// };
-
-// module.exports = roleHarvester;
+function FindRootRoom(roomName) {
+    for (let i in Memory.rootRooms) { 
+        if (Memory.rootRooms[i].name == roomName)
+            return Memory.rootRooms[i];
+    }
+}

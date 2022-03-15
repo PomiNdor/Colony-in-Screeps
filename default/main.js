@@ -8,6 +8,8 @@ var roleSpawner =   require('role.spawner');
 var roleMiner =     require('role.miner');
 var roleSearcher =  require('role.searcher');
 var roleCarrier =  require('role.carrier');
+var roleDamager =  require('role.damager');
+var roleTower =  require('role.tower');
 // E4S17
 
 var moduleRoom =        require('module.room');
@@ -16,11 +18,13 @@ var moduleConstants =   require('module.constants');
 const roomNames = moduleConstants.roomNames;  // 'E2S17'
 
 module.exports.loop = function () {
-    moduleConstants.setRootRoomsConstants();
+    moduleRoom.setRootRoomsConstants();
     
     
     // --------- SPAWN
-    roleSpawner.run(Game.spawns['Spawn1']);
+    for(var name in Game.spawns) {
+        roleSpawner.run(Game.spawns[name]);
+    }
     
     // --------- ROOMS
     roomNames.forEach(nameRoom => {
@@ -36,21 +40,12 @@ module.exports.loop = function () {
     
     
     // --------- TOWER
-    var tower = Game.getObjectById('60e01b8ce63ac4823ee239fc');
-    if(tower) {
-        var closestHostile = tower.pos.findClosestByRange(FIND_HOSTILE_CREEPS);
-        if(closestHostile) {
-            tower.attack(closestHostile);
-        }
-        if (tower.energy > 800) {
-            var targets_repair = tower.room.find(FIND_STRUCTURES, {
-                filter: object => object.hits < object.hitsMax && object.structureType != STRUCTURE_WALL});
-            targets_repair.sort((a,b) => a.hits - b.hits);
-            if (targets_repair.length)
-                tower.repair(targets_repair[0]);
-        }
-        
-    }
+    
+    _.forEach(['60e01b8ce63ac4823ee239fc', '60e390b7e23798720459b086'], towerId => {
+        var tower = Game.getObjectById(towerId);
+        if(tower) roleTower.run(tower);
+    });
+    
     
     // --------- SPAWN
     roleSpawner.run(Game.spawns['Spawn1']);
@@ -85,65 +80,82 @@ module.exports.loop = function () {
         }
         
         
-        //Game.spawns['Spawn1'].spawnCreep([TOUGH, TOUGH, TOUGH, TOUGH, TOUGH, CLAIM, WORK, CARRY, MOVE, MOVE, MOVE],'claimer_'+Game.time, {memory: {role: 'claimer'}});
+        // if(creep.memory.role == 'dropper') {
+        //     const route = Game.map.findRoute(creep.room, 'E3S16');
+        //     if(route.length > 0) {
+        //         creep.say(route[0].room);
+        //         const exit = creep.pos.findClosestByRange(route[0].exit);
+        //         creep.moveTo(exit, {visualizePathStyle: {stroke: 'blue', opacity: 0.3}});
+        //     } else {
+        //         if (creep.store[RESOURCE_ENERGY] > 0) {
+        //             creep.drop(RESOURCE_ENERGY);
+        //         } else {
+        //             target_spawn = creep.pos.findClosestByRange(FIND_HOSTILE_SPAWNS, {
+        //                 filter: structure => structure.store[RESOURCE_ENERGY] > 0});
+                        
+        //             target_sturcture = creep.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES, {
+        //                 filter: (structure) => { return structure.structureType != 'controller' && structure.store[RESOURCE_ENERGY] > 0}
+        //             });
+        //             // if (target_spawn) {
+        //             //     console.log(target_spawn);
+        //             //     console.log(creep.withdraw(target_spawn, RESOURCE_ENERGY));
+        //             //     if(creep.withdraw(target_spawn, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) 
+        //             //         creep.moveTo(target_spawn, {visualizePathStyle: {stroke: 'blue'}});
+        //             // } else 
+        //             if (target_sturcture) {
+        //                 console.log(creep.withdraw(target_sturcture, RESOURCE_ENERGY));
+        //                 if(creep.withdraw(target_sturcture, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) 
+        //                     creep.moveTo(target_sturcture, {visualizePathStyle: {stroke: 'blue'}});
+        //             }
+        //         }
+        //     }
+        // }
+        
+        
+        
+        //Game.spawns['Spawn1'].spawnCreep([CLAIM, WORK, CARRY, MOVE, MOVE, MOVE],'claimer_'+Game.time, {memory: {role: 'claimer'}});
+        //Game.spawns['Spawn1'].spawnCreep([TOUGH, TOUGH, WORK, WORK, WORK, WORK, WORK, WORK, CARRY, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE, MOVE],'claimer_'+Game.time, {memory: {role: 'claimer'}});
         if (creep.memory.role == 'claimer') {
             //console.log(creep.getObjectById('5bbcad559099fc012e63722e'));
             const route = Game.map.findRoute(creep.room, 'E4S17');
+            
             if(route.length > 0) {
                 console.log('Now heading to room '+route[0].room);
-                const exit = creep.pos.findClosestByRange(route[0].exit);
-                //creep.moveTo(49, 38);
-                creep.moveTo(exit, {visualizePathStyle: {stroke: 'red', opacity: 0.5}});
+                if (creep.room.name == 'E2S16')
+                    creep.moveTo(33, 0, {visualizePathStyle: {stroke: 'purple', opacity: 0.5}});
+                else if (creep.room.name == 'E2S15')
+                    creep.moveTo(49, 34, {visualizePathStyle: {stroke: 'purple', opacity: 0.5}});
+                else if (creep.room.name == 'E3S15')
+                    creep.moveTo(49, 39, {visualizePathStyle: {stroke: 'purple', opacity: 0.5}});
+                else if (creep.room.name == 'E4S15')
+                    creep.moveTo(10, 49, {visualizePathStyle: {stroke: 'purple', opacity: 0.5}});
+                else {
+                    let exit = creep.pos.findClosestByRange(route[0].exit);
+                    //creep.moveTo(49, 38,  {visualizePathStyle: {stroke: 'purple', opacity: 0.5}});
+                    creep.moveTo(exit, {visualizePathStyle: {stroke: 'purple', opacity: 0.5}});
+                }
+                    
             }
             else {
-                if(creep.room.controller) {
-                    if(creep.reserveController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: 'red', opacity: 0.5}});
-                    }
-                }
+                if (creep.pos.x != 12 && creep.pos.y != 3) creep.moveTo(12, 3);
+                else creep.memory.role = 'builder';
+                // var sources = creep.room.find(FIND_SOURCES_ACTIVE); //creep.room.find(FIND_SOURCES_ACTIVE);
+                // if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE) {
+                //     creep.moveTo(sources[0], {visualizePathStyle: {stroke: '#ffffff'}});
+                // }
+                // if(creep.room.controller) {
+                //     if(creep.claimController(creep.room.controller) == ERR_NOT_IN_RANGE) {
+                //         creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: 'purple', opacity: 0.5}});
+                //     }
+                // }
             }
         }
         
         let damagerParts = [ATTACK, ATTACK, ATTACK, ATTACK, ATTACK, MOVE, MOVE, MOVE, MOVE, MOVE];
-        //Game.spawns['Spawn1'].spawnCreep(damagerParts, 'damager', {memory: {role: 'damager'}});
+        //Game.spawns['Spawn1'].spawnCreep(damagerParts, 'damager_'+Game.time, {memory: {role: 'damager'}});
         //Game.spawns['Spawn1'].spawnCreep([ATTACK, MOVE], 'damager_'+Game.time, {memory: {role: 'damager'}});
         if (creep.memory.role == 'damager') {
-            //console.log(creep.getObjectById('5bbcad559099fc012e63722e'));
-            const route = Game.map.findRoute(creep.room, 'E5S17');
-            if(route.length > 0) {
-                console.log('Now heading to room '+route[0].room);
-                const exit = creep.pos.findClosestByRange(route[0].exit);
-                creep.moveTo(exit, {visualizePathStyle: {stroke: 'red', opacity: 0.5}});
-            }
-            else {
-                let target_tower = creep.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES, 
-                    { filter: (structure) => { 
-                        return  structure.structureType == STRUCTURE_TOWER; }
-                });
-                const target_creeps = creep.pos.findClosestByRange(FIND_HOSTILE_CREEPS);//FIND_HOSTILE_CREEPS
-                if (target_tower) {
-                    if(creep.attack(target_tower) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(target_tower, {visualizePathStyle: {stroke: 'red'}});
-                    }
-                }
-                else if(target_creeps != null) {
-                    if(creep.attack(target_creeps) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(target_creeps, {visualizePathStyle: {stroke: 'red'}});
-                    }
-                } else {
-                    target_spawns = creep.pos.findClosestByRange(FIND_HOSTILE_SPAWNS);//FIND_HOSTILE_CREEPS
-                    if(creep.attack(target_spawns) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(target_spawns, {visualizePathStyle: {stroke: 'red'}});
-                    }
-                    target_sturctures = creep.pos.findClosestByRange(FIND_HOSTILE_STRUCTURES, {
-                        filter: (structure) => { return structure.structureType != 'controller'}
-                    });//FIND_HOSTILE_CREEPS
-                    console.log(target_sturctures);
-                    if(creep.attack(target_sturctures) == ERR_NOT_IN_RANGE) {
-                        creep.moveTo(target_sturctures, {visualizePathStyle: {stroke: 'red'}});
-                    }
-                }
-            }
+            roleDamager.run(creep);
         }
         
         
