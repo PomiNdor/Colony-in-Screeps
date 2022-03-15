@@ -11,10 +11,10 @@ var moduleFunctions = require('module.functions');
 
 module.exports = {
     run: function(creep) {
-        let rootRoom = moduleFunctions.FindRootRoomMemory(creep.memory.rootRoomName);
-        if (rootRoom && rootRoom.NoSearchedRooms && rootRoom.NoSearchedRooms.length != 0) {
-            if (!(_.find(rootRoom.NoSearchedRooms, room => room.name == creep.room.name))) {
-                let route = Game.map.findRoute(creep.room, rootRoom.NoSearchedRooms[0].name);
+        let fraction = moduleFunctions.FindFractionMemory(creep.memory.fractionRoom);
+        if (fraction && fraction.NoSearchedRooms && fraction.NoSearchedRooms.length != 0) {
+            if (!(_.find(fraction.NoSearchedRooms, room => room.name == creep.room.name))) {
+                let route = Game.map.findRoute(creep.room, fraction.NoSearchedRooms[0].name);
                 if (route.length > 0)
                     creep.moveTo(creep.pos.findClosestByRange(route[0].exit), {visualizePathStyle: {stroke: '#ffffff'}});
             } else {

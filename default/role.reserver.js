@@ -25,6 +25,9 @@ module.exports = {
             }
         }
 
+
+        
+        if (creep.spawning) return;
         if (creep.room.name != creep.memory.targetRoom) {
             creep.say(creep.memory.targetRoom);
             
@@ -43,7 +46,7 @@ module.exports = {
         } else {
             if (creep.room.controller) {
                 if(creep.reserveController(creep.room.controller) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(creep.room.controller, {visualizePathStyle: {stroke: 'purple', opacity: 0.5}});
+                    creep.moveTo(creep.room.controller, {maxRooms: 1, visualizePathStyle: {stroke: 'purple', opacity: 0.5}});
                 }
             }
         }
@@ -65,8 +68,8 @@ module.exports = {
 
 function FindRoomForReserver(creep) {
 
-    let rootRoom = moduleFunctions.FindRootRoomMemory(creep.memory.rootRoomName);
-    let roomNames = rootRoom.miningRooms;
+    let fraction = moduleFunctions.FindFractionMemory(creep.memory.fractionRoom);
+    let roomNames = fraction.miningRoomsName;
     let minigRooms = [];
     for (let i in roomNames) {
         var gameRoom = Game.rooms[roomNames[i]];
@@ -75,17 +78,16 @@ function FindRoomForReserver(creep) {
             if (!gameRoom.memory.reservers) gameRoom.memory.reservers = [];
             
             if (gameRoom.memory.reservers.length == 0 && (!gameRoom.controller.reservation ||
-                gameRoom.controller.reservation.ticksToEnd < rootRoom.reservingMinTick)
+                gameRoom.controller.reservation.ticksToEnd < fraction.reservingMinTick)
                 && (!hostile_attack_creeps || hostile_attack_creeps.length == 0))
                 minigRooms.push(gameRoom);
         }   
     }
-    
     //roomNames.sort((a,b) => a.hits - b.hits);
     minigRooms.sort((a, b) => {
-        let tickA = (a.controller.reservation && a.controller.reservation.ticksToEnd > rootRoom.reservingMinTick)
+        let tickA = (a.controller.reservation && a.controller.reservation.ticksToEnd > fraction.reservingMinTick)
                      ? a.controller.reservation.ticksToEnd : 0,
-            tickB = (b.controller.reservation && b.controller.reservation.ticksToEnd > rootRoom.reservingMinTick)
+            tickB = (b.controller.reservation && b.controller.reservation.ticksToEnd > fraction.reservingMinTick)
                      ? b.controller.reservation.ticksToEnd : 0;
                      
         return tickA - tickB; //a.controller.reservation.ticksToEnd - b.controller.reservation.ticksToEnd

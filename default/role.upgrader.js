@@ -11,46 +11,43 @@ var roleUpgrader = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
-        if(creep.memory.upgrading && creep.store[RESOURCE_ENERGY] == 0) {
-            creep.memory.upgrading = false;
-            creep.say('🔄 harvest');
-	    }
-	    if(!creep.memory.upgrading && creep.store.getFreeCapacity() == 0) {
-	        creep.memory.upgrading = true;
-	        creep.say('🚧 upgraid');
-	    }
+        
+        if (creep.spawning) return;
+        creep.CheсkStatus('upgrading');
         
         
 	    if(!creep.memory.upgrading) {
-            // Фильтр не протестил
-	        let target_resource = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES, {filter: res => {
-                return res.resourceType == RESOURCE_ENERGY;
-            }});
+            let target_resource = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES, {filter: target => target.amount > 100});
+            let target_tombstone = creep.pos.findClosestByRange(FIND_TOMBSTONES, {filter: target => target.store.getUsedCapacity(RESOURCE_ENERGY) > 0}); // не тестил
+            let target_ruins = creep.pos.findClosestByRange(FIND_RUINS, {filter: target => target.store.getUsedCapacity(RESOURCE_ENERGY) > 0}); // не тестил
             let target_container = creep.pos.findClosestByRange(FIND_STRUCTURES, { filter: (structure) => { 
-                return structure.structureType == STRUCTURE_CONTAINER && structure.store[RESOURCE_ENERGY] >= 100;
+                return structure.structureType == STRUCTURE_CONTAINER && structure.store[RESOURCE_ENERGY] >= creep.store.getFreeCapacity();
             }});
-            var sources = creep.pos.findClosestByRange(FIND_SOURCES_ACTIVE);
             
-            if (target_resource && CreepInObjectRadius(creep, target_resource)) {
+            
+            if (target_resource) {
                 if (creep.pickup(target_resource) == ERR_NOT_IN_RANGE)
-                    creep.moveTo(target_resource, {visualizePathStyle: {stroke: '#ffffff'}});
-            }
-            else if (target_container && CreepInObjectRadius(creep, target_container)) {
-                if(creep.withdraw(target_container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
-                    creep.moveTo(target_container);
-            }
-            else if (target_resource) {
-                if (creep.pickup(target_resource) == ERR_NOT_IN_RANGE)
-                    creep.moveTo(target_resource, {visualizePathStyle: {stroke: '#ffffff'}});
+                    creep.moveTo(target_resource, {maxRooms: 1, visualizePathStyle: {stroke: '#ffffff'}});
+                    
+            } else if (target_tombstone) {
+                if(creep.withdraw(target_tombstone, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
+                    creep.moveTo(target_tombstone, {maxRooms: 1, visualizePathStyle: {stroke: '#ffffff'}});
+            } else if (target_ruins) {
+                if(creep.withdraw(target_ruins, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
+                    creep.moveTo(target_ruins, {maxRooms: 1, visualizePathStyle: {stroke: '#ffffff'}});
+            } else if (creep.room.storage && creep.room.storage.store[RESOURCE_ENERGY] >= 10000) {
+                if(creep.withdraw(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
+                    creep.moveTo(creep.room.storage, {maxRooms: 1, visualizePathStyle: {stroke: '#ffffff'}});
+                    
             } else if (target_container) {
                 if(creep.withdraw(target_container, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
-                    creep.moveTo(target_container);
-            } else if (sources) {
-                if(creep.harvest(sources) == ERR_NOT_IN_RANGE)
+                    creep.moveTo(target_container, {maxRooms: 1, visualizePathStyle: {stroke: '#ffffff'}});
+                    
+            } else {
+                var sources = creep.pos.findClosestByRange(FIND_SOURCES_ACTIVE);
+                if(creep.harvest(sources) == ERR_NOT_IN_RANGE) {
                     creep.moveTo(sources, {visualizePathStyle: {stroke: '#ffffff'}});
-            } else if (creep.room.storage && creep.room.storage.store[RESOURCE_ENERGY] > 10000) {
-                if (creep.withdraw(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
-                    creep.moveTo(creep.room.storage, {visualizePathStyle: {stroke: '#ffffff'}});
+                }
             }
         }
         else {
@@ -62,10 +59,3 @@ var roleUpgrader = {
 };
 
 module.exports = roleUpgrader;
-
-
-function CreepInObjectRadius(creep, object, radius = 1) {
-    let x = creep.pos.x - object.pos.x;
-    let y = creep.pos.y - object.pos.y;
-    return (x >= -radius && x <= radius) && (y >= -radius && y <= radius);
-}

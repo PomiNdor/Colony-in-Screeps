@@ -6,69 +6,64 @@
  * var mod = require('role.builder');
  * mod.thing == 'a thing'; // true
  */
+var roles = {
+    'upgrader': require('role.upgrader')
+};
 const builderColor = '#FFA500';
 
 var roleBuilder = {
 
     /** @param {Creep} creep **/
     run: function(creep) {
-
-	    if(creep.memory.building && creep.store[RESOURCE_ENERGY] == 0) {
-            creep.memory.building = false;
-            creep.say('🔄 harvest');
-	    }
-	    if(!creep.memory.building && creep.store.getFreeCapacity() == 0) {
-	        creep.memory.building = true;
-	        creep.say('🚧 build');
-	    }
+        if (creep.spawning) return;
+        creep.CheсkStatus('building');
 
 	    if(creep.memory.building) {
-			let target__ = Game.getObjectById('60f74aeb08b916f959de6e1e');
-	        var targets_build = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES);
-	        var targets_repair = creep.room.find(FIND_STRUCTURES, {
-	            filter: object => object.hits < object.hitsMax});
-	        targets_repair.sort((a,b) => a.hits - b.hits);
-	        if (target__){
-				if(creep.build(target__) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(target__, {visualizePathStyle: {stroke: builderColor}});
+            
+                var targets_build = creep.room.find(FIND_CONSTRUCTION_SITES);
+                var targets_repair = [];
+                // = creep.room.find(FIND_STRUCTURES, { filter: object => object.hits < object.hitsMax});
+                // targets_repair.sort((a,b) => a.hits - b.hits);
+                
+                if (targets_repair.length && targets_repair[0].hits < 2000) {
+                    if (creep.repair(targets_repair[0]) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(targets_repair[0], {visualizePathStyle: {stroke: builderColor}});
+                    }
+                } else if(targets_build.length) {
+                    if(creep.build(targets_build[0]) == ERR_NOT_IN_RANGE) {
+                        creep.moveTo(targets_build[0], {visualizePathStyle: {stroke: builderColor}});
+                    }
+               } else {
+                    roles['upgrader'].run(creep);
                 }
-			}
-	        else if (targets_repair.length && targets_repair[0].hits < 2000) {
-	            if (creep.repair(targets_repair[0]) == ERR_NOT_IN_RANGE) {
-	                creep.moveTo(targets_repair[0], {visualizePathStyle: {stroke: builderColor}});
-	            }
-	        }
-            else if(targets_build) {
-                if(creep.build(targets_build) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(targets_build, {visualizePathStyle: {stroke: builderColor}});
-                }
-            // } else if (targets_repair.length) {
-	           // if (creep.repair(targets_repair[0]) == ERR_NOT_IN_RANGE) {
-	           //     creep.moveTo(targets_repair[0], {visualizePathStyle: {stroke: builderColor}});
-	           // }
-	        } else if (creep.pos.x != 15 && creep.pos.y != 33) {
-                creep.say("ffff");
-                creep.moveTo(15, 33, {visualizePathStyle: {stroke: builderColor}});
-            }
-	    }
-	    else {
-	        let target_resource = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES);
+	        
+	    } else {
+            let target_resource = creep.pos.findClosestByRange(FIND_DROPPED_RESOURCES, {filter: target => target.resourceType == RESOURCE_ENERGY && target.amount > 100}); // не тестил
+            let target_tombstone = creep.pos.findClosestByRange(FIND_TOMBSTONES, {filter: target => target.store.getUsedCapacity(RESOURCE_ENERGY) > 0}); // не тестил
+            let target_ruins = creep.pos.findClosestByRange(FIND_RUINS, {filter: target => target.store.getUsedCapacity(RESOURCE_ENERGY) > 0}); // не тестил
+
+
             if (target_resource) {
                 if (creep.pickup(target_resource) == ERR_NOT_IN_RANGE)
-                    creep.moveTo(target_resource, {visualizePathStyle: {stroke: builderColor}});
-            } else if (creep.room.storage && creep.room.storage.store[RESOURCE_ENERGY] > 10000) {
-	            if(creep.withdraw(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(creep.room.storage, {visualizePathStyle: {stroke: builderColor}});
+                    creep.moveTo(target_resource, {maxRooms: 1, visualizePathStyle: {stroke: '#ffffff'}});
+                    
+            } else if (target_tombstone) {
+                if(creep.withdraw(target_tombstone, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
+                    creep.moveTo(target_tombstone, {maxRooms: 1, visualizePathStyle: {stroke: '#ffffff'}});
+            } else if (target_ruins) {
+                if(creep.withdraw(target_ruins, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
+                    creep.moveTo(target_ruins, {maxRooms: 1, visualizePathStyle: {stroke: '#ffffff'}});
+            } else if (creep.room.storage && creep.room.storage.store[RESOURCE_ENERGY] >= 10000) {
+                if(creep.withdraw(creep.room.storage, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE)
+                    creep.moveTo(creep.room.storage, {maxRooms: 1, visualizePathStyle: {stroke: '#ffffff'}});
+                    
+            } else {    // То что было раньше
+                var source = creep.pos.findClosestByRange(FIND_SOURCES_ACTIVE); //creep.room.find(FIND_SOURCES_ACTIVE);
+                if(creep.harvest(source) == ERR_NOT_IN_RANGE) {
+                    creep.moveTo(source, {visualizePathStyle: {stroke: builderColor}});
                 }
-	        } else if (creep.room.terminal && creep.room.terminal.store[RESOURCE_ENERGY] > 10000) {
-	            if(creep.withdraw(creep.room.terminal, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE) {
-                    creep.moveTo(creep.room.terminal, {visualizePathStyle: {stroke: builderColor}});
-                }
-	        } else {
-	            var sources = creep.room.find(FIND_SOURCES_ACTIVE); //creep.room.find(FIND_SOURCES_ACTIVE);
-                if(creep.harvest(sources[0]) == ERR_NOT_IN_RANGE)
-                    creep.moveTo(sources[0], {visualizePathStyle: {stroke: builderColor}});
-	        }
+            }
+	        
 	    }
 	}
 };
